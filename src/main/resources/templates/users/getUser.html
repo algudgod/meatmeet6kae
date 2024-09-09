@@ -1,0 +1,14 @@
+<!-- src/main/resources/templates/users/getUser.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>User Info</title>
+</head>
+
+<body>
+<h1>User Information</h1>
+<p th:if="${user.isPresent()}">Login ID: <span th:text="${user.get().loginId}"></span></p>
+<p th:if="${!user.isPresent()}">User not found</p>
+</body>
+</html>

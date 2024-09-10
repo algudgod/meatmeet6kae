@@ -9,6 +9,7 @@
 <body>
 <h1>User Information</h1>
 <p th:if="${user.isPresent()}">Login ID: <span th:text="${user.get().loginId}"></span></p>
-<p th:if="${!user.isPresent()}">User not found</p>
+<p th:if="${!user.isPresent()}">User not found, 해당 id가 존재하지 않음</p>
+
 </body>
 </html>

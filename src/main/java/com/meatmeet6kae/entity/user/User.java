@@ -1,4 +1,4 @@
-package com.meatmeet6kae.entity;
+package com.meatmeet6kae.entity.user;
 
 import jakarta.persistence.*;
 

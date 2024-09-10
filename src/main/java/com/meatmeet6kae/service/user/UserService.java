@@ -1,7 +1,7 @@
-package com.meatmeet6kae.service;
+package com.meatmeet6kae.service.user;
 
-import com.meatmeet6kae.entity.User;
-import com.meatmeet6kae.repository.UserRepository;
+import com.meatmeet6kae.entity.user.User;
+import com.meatmeet6kae.repository.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,14 +31,10 @@ public class UserService {
 
         return user;
     }
-    // 사용자 추가
     public User addUser(User user) {
-/*      // 이미 존재하는지 확인
-        if (userRepository.findByLoginId(user.getLoginId()).isPresent()) {
-            throw new IllegalArgumentException("User with loginId already exists");
-        }
-*/
-        return userRepository.save(user); //추가된 사용자 저장
+        // 추가 로직
+        return userRepository.save(user);  // Repository를 통해 사용자 저장
     }
+
 }
 

@@ -10,11 +10,12 @@ public class User {
 
     @Id
     private String loginId;
+    @Column(name = "use_yn", nullable = false, insertable = false) //insert할 때 포함하지 않는다. default=Y
     private String useYn;
     private String password;
     private String name;
     private String role;
-    private int gender;
+    private String gender;
     private String addr;
     private String email;
     private String emailYn;
@@ -69,11 +70,11 @@ public class User {
         this.role = role;
     }
 
-    public int getGender() {
+    public String getGender() {
         return gender;
     }
 
-    public void setGender(int gender) {
+    public void setGender(String gender) {
         this.gender = gender;
     }
 

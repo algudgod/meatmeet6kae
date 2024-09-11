@@ -8,9 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
@@ -54,5 +52,40 @@ public class UserController {
         return "users/getUser";
     }
 
+    // 회원 가입 폼을 보여주는 메서드
+    @GetMapping("/addUserForm")
+    public String showAddUserForm() {
+        return "users/addUserForm";  // 회원 가입 폼 페이지
+    }
+
+    @PostMapping("/addUser")
+    public String addUser(@ModelAttribute User newUser, Model model) {
+        userService.addUser(newUser);
+        model.addAttribute("user",newUser);
+        return "users/addUser";
+    }
+
+    //로그인 폼을 보여주는 메서드
+    @GetMapping("/login")
+    public String showLoginForm() {
+        return "users/login";  // templates/users/login.html 파일을 반환
+    }
+
+    @PostMapping("/login")
+    public String login( @RequestParam("loginId") String loginId,
+                         @RequestParam("password") String password,
+                         HttpSession session, Model model) {
+
+        User user = userService.login(loginId, password);  // UserService의 login 메서드 호출
+        if (user != null) {
+            // 로그인 성공 - 세션에 사용자 정보 저장
+            session.setAttribute("user", user);
+            return "redirect:/home";  // 로그인 성공 후 홈으로 리다이렉트
+        } else {
+            // 로그인 실패 - 에러 메시지 전달
+            model.addAttribute("error", "Invalid login ID or password");
+            return "users/login";  // 로그인 폼으로 다시 이동
+        }
+    }
 
 }

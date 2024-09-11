@@ -23,18 +23,30 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    // login_id로 사용자 조회
+    //login_id로 사용자 조회
     public Optional<User> getUserByLoginId(String loginId) {
         logger.debug("getUserByLoginId called with loginId: {}", loginId); // DEBUG: getUserByLoginId 호출 여부 로그 출력
 
-        Optional<User> user = userRepository.findByLoginId(loginId); //사용자 조회
+        Optional<User> user = userRepository.findByLoginId(loginId); //Optional 사용한 사용자 조회
 
         return user;
     }
+    //사용자 추가 메서드
     public User addUser(User user) {
-        // 추가 로직
         return userRepository.save(user);  // Repository를 통해 사용자 저장
     }
 
+    //Optional<User>를 사용해 로그인 처리
+    public User login(String loginId, String password) {
+        Optional<User> loginUser = getUserByLoginId(loginId);  //
+
+        if (loginUser.isPresent()) {
+            User user = loginUser.get();
+            if (user.getPassword().equals(password)) {
+                return user;  // 로그인 성공
+            }
+        }
+        return null;  // 로그인 실패 시 null 반환
+    }
 }
 

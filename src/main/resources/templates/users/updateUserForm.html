@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>내 정보 수정</title>
+
+    <style>
+
+    </style>
+</head>
+
+<body>
+<!-- 헤더를 포함 -->
+<div th:replace="~{common/header :: header}"></div>
+<div class="container">
+    <h2>내 정보 수정</h2>
+
+    <form th:action="@{/users/updateUser}" method="post">
+        <div class="form-row">
+            <label class="form-label">아이디:</label>
+            <input type="text" class="form-input" th:value="${user.loginId}" disabled />
+        </div>
+
+        <div class="form-row">
+            <label class="form-label">이름:</label>
+            <input type="text" class="form-input" name="name" th:value="${user.name}" />
+        </div>
+
+        <div class="form-row">
+            <label class="form-label">성별:</label>
+            <select class="form-select" name="gender">
+                <option value="M" th:selected="${user.gender == 'M'}">남성</option>
+                <option value="F" th:selected="${user.gender == 'F'}">여성</option>
+            </select>
+        </div>
+
+        <div class="form-row">
+            <label class="form-label">주소:</label>
+            <input type="text" class="form-input" name="addr" th:value="${user.addr}" />
+        </div>
+
+        <div class="form-row">
+            <label class="form-label">이메일:</label>
+            <input type="email" class="form-input" name="email" th:value="${user.email}" />
+        </div>
+
+        <div class="form-row">
+            <label class="form-label">이메일 수신:</label>
+            <select class="form-select" name="emailYn">
+                <option value="Y" th:selected="${user.emailYn == 'Y'}">Y</option>
+                <option value="N" th:selected="${user.emailYn == 'N'}">N</option>
+            </select>
+        </div>
+
+        <div class="action-buttons">
+            <button type="submit">저장</button>
+            <button type="button" onclick="location.href='/users/showUserInfo'">뒤로가기</button>
+        </div>
+    </form>
+    <!-- 푸터 -->
+    <div th:replace="~{common/footer :: footer}"></div>
+</div>
+
+</body>
+</html>

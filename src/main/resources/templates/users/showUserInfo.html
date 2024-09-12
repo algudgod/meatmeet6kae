@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>내 정보 보기</title>
+    <style>
+
+
+    </style>
+</head>
+<body>
+<!-- 헤더를 포함 -->
+<div th:replace="~{common/header :: header}"></div>
+<div class="container">
+    <h2>내 정보 보기</h2>
+
+    <div class="info-row">
+        <span class="info-label">아이디:</span>
+        <span class="info-value" th:text="${user.loginId}">user123</span>
+    </div>
+
+    <div class="info-row">
+        <span class="info-label">이름:</span>
+        <span class="info-value" th:text="${user.name}">홍길동</span>
+    </div>
+
+    <div class="info-row">
+        <span class="info-label">성별:</span>
+        <span class="info-value" th:text="${user.gender == 'M' ? '남성' : '여성'}">남성</span>
+    </div>
+
+    <div class="info-row">
+        <span class="info-label">주소:</span>
+        <span class="info-value" th:text="${user.addr}">서울시 강동구</span>
+    </div>
+
+    <div class="info-row">
+        <span class="info-label">이메일:</span>
+        <span class="info-value" th:text="${user.email}">hong@example.com</span>
+    </div>
+
+    <div class="info-row">
+        <span class="info-label">이메일 수신:</span>
+        <span class="info-value" th:text="${user.emailYn}">Y</span>
+    </div>
+
+    <div class="info-row">
+        <span class="info-label">가입일:</span>
+        <span class="info-value" th:text="${user.createDate}">20240901</span>
+    </div>
+
+    </div>
+
+
+    <div class="action-buttons">
+        <a href="/users/updateUserForm" class="button">정보 수정</a>
+        <!-- 탈퇴 버튼: POST 방식으로 탈퇴를 처리하기 위한 JavaScript 사용 -->
+        <a href="#" class="button" onclick="event.preventDefault(); if(confirm('정말 탈퇴하시겠습니까?'))
+        document.getElementById('deactivate-form').submit();">탈퇴하기</a>
+        <!-- 숨겨진 탈퇴 폼 (POST 요청을 보내기 위해 사용) -->
+        <form id="deactivate-form" th:action="@{/users/deactivate}" method="post" style="display: none;"></form>
+    </div>
+    </div>
+
+<div th:replace="~{common/footer :: footer}"></div>
+
+</div>
+
+</body>
+</html>

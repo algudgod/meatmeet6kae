@@ -48,5 +48,11 @@ public class UserService {
         }
         return null;  // 로그인 실패 시 null 반환
     }
+
+    public User updateUser(User user) {
+        // 데이터베이스에 사용자 정보 업데이트
+        return userRepository.save(user);
+    }
+
 }
 

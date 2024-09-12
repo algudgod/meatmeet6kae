@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>MeatMeet6kae</title>
+    <style>
+
+
+    </style>
+</head>
+
+<body>
+
+    <div class="header" th:fragment="header">
+        <h1>MeatMeet6kae</h1>
+
+        <!-- 로그인 여부에 따른 처리 -->
+        <div th:if="${user != null}">
+            <p class="welcome-message">환영합니다, <span th:text="${user.name}">사용자</span>님!</p>
+            <!-- 현재 URL이 /users/showUserInfo가 아닐 때만 내정보보기 링크를 표시 -->
+            <a th:if="${currentUrl != '/users/showUserInfo'}" href="/users/showUserInfo">내정보보기</a>
+            <a href="/users/logout">로그아웃</a>
+        </div>
+
+        <div th:if="${user == null}">
+            <a href="/users/login">로그인</a>
+            <a href="/users/addUserForm">회원 가입</a>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -4,72 +4,34 @@
 <head>
     <meta charset="UTF-8">
     <title>MeatMeet6kae</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+
     <style>
-        /* 중앙 정렬 및 기본 레이아웃 설정 */
-        .container {
-            margin: 0 auto;
-            width: 80%;
-            text-align: center;  /* 모든 요소를 중앙 정렬 */
-        }
-
-        /* 링크 스타일링 */
-        a {
-            padding: 10px 20px;
-            text-decoration: none;
-            background-color: #f04a4a;  /* 빨간색 배경 */
-            color: white;
-            border-radius: 5px;
-            display: inline-block;
-        }
-
-        a:hover {
-            background-color: #e63939;  /* 링크에 마우스를 올렸을 때 조금 더 진한 빨간색 */
-        }
-
-        /* 환영 메시지 스타일 */
-        .welcome-message {
-            color: green;
-            font-weight: bold;
-        }
-
-        /* 헤더 스타일 */
-        h1 {
-            color: #333;
-        }
-
-        /* 단락 스타일 */
-        p {
-            font-size: 1.2em;
-            margin: 10px 0;
-        }
 
     </style>
-
 </head>
-
 
 <body>
 
 <div class="container">
+
+    <!-- 헤더 -->
+    <div th:replace="~{common/header :: header}"></div>
+
+    <!-- 메인 컨텐츠 -->
     <div>
-        <h1>MeatMeet6kae</h1>
-        <p>육회를 사랑하는 사람들의 모임 공간</p>
 
         <p>
-            <a href="/users/addUserForm">회원 가입</a>
+         <h1>content</h1>
+        <p>
+            <img th:src="@{/images/main6kaepic.jpg}" alt="이미지가 로드 실패." width="300" height="auto" />
         </p>
-        <p></p>
-        <!-- 로그인 여부에 따른 처리 -->
-        <div th:if="${user != null}">
-            <p class="welcome-message">환영합니다, <span th:text="${user.name}">사용자</span>님!</p>
-            <a href="/users/logout">로그아웃</a>
-        </div>
-
-        <div th:if="${user == null}">
-            <a href="/users/login">로그인</a>
-        </div>
+        </p>
 
     </div>
+
+    <!-- 푸터 -->
+    <div th:replace="~{common/footer :: footer}"></div>
 </div>
 <!-- /container -->
 

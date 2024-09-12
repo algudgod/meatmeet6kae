@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
+    <meta charset="UTF-8">
     <title>로그인</title>
 </head>
 
@@ -19,8 +20,15 @@
         </div>
         <div>
             <button type="submit">로그인</button>
+            <div th:if="${error}" class="error-message" th:text="${error}"></div>
         </div>
     </form>
+
+    <!-- 아이디 찾기 및 비밀번호 찾기 링크 추가 -->
+    <div>
+        <a href="/users/findUserId">아이디 찾기</a> |
+        <a href="/users/findPasswordForm">비밀번호 찾기</a>
+    </div>
 </div>
 </body>
 

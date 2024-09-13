@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class EmailService {
+
 /*
     @Autowired
     private JavaMailSender javaMailSender; //이메일 전송 객체. build.gradle에 의존성 추가 후 사용 가능.

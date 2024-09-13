@@ -197,8 +197,8 @@ public class UserController {
     }
 
     //ID찾기 폼을 보여주는 메서드
-    @GetMapping("/findUserId")
-    public String findUserId() {
+    @GetMapping("/findUserIdForm")
+    public String findUserIdForm() {
         return "users/findUserId";
     }
 }

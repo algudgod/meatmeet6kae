@@ -1,7 +1,9 @@
 package com.meatmeet6kae.controller.user;
 
 import com.meatmeet6kae.entity.user.User;
+import com.meatmeet6kae.entity.verification.EmailVerification;
 import com.meatmeet6kae.service.user.UserService;
+import com.meatmeet6kae.service.verification.EmailVerificationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
@@ -23,6 +25,8 @@ public class UserController {
     //UserService 주입: 서비스 계층 로직 호출
     @Autowired
     private UserService userService;
+    @Autowired
+    private EmailVerificationService emailVerificationService;
 
     @GetMapping(value = "getUsers")
     public String getUsers(@RequestParam("loginId") String loginId, Model model, HttpSession session) {
@@ -58,11 +62,18 @@ public class UserController {
         return "users/addUserForm";  // 회원 가입 폼.html
     }
 
-    // 회원 가입
     @PostMapping("/addUser")
-    public String addUser(@ModelAttribute User newUser, Model model) {
+    public String addUser(@ModelAttribute User newUser,@RequestParam("token") String token, Model model) {
+        // 토큰을 기반으로 이메일 인증 확인 -0915 코드추가
+        if (!emailVerificationService.isEmailVerified(token)) {
+            // 이메일 인증이 되지 않은 경우
+            model.addAttribute("error", "이메일 인증이 필요합니다.");
+            return "users/addUserForm"; // 가입 폼으로 다시 이동
+        }
+
+        // 이메일 인증이 된 경우에만 사용자 추가
         userService.addUser(newUser);
-        model.addAttribute("user",newUser);
+        model.addAttribute("user", newUser);
         return "users/addUser";
     }
 
@@ -201,4 +212,6 @@ public class UserController {
     public String findUserIdForm() {
         return "users/findUserId";
     }
+
+
 }

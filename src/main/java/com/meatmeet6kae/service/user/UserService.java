@@ -53,6 +53,5 @@ public class UserService {
         // 데이터베이스에 사용자 정보 업데이트
         return userRepository.save(user);
     }
-
 }
 

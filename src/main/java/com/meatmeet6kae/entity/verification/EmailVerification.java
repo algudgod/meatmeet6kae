@@ -1,6 +1,5 @@
 package com.meatmeet6kae.entity.verification;
 
-import com.meatmeet6kae.entity.user.User;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -14,9 +13,6 @@ public class EmailVerification {
     private String token;
     private LocalDateTime tokenExpiration;  // 토큰 만료 시간
     private boolean verificationStatus = false;  // 이메일 인증 완료 여부
-    @ManyToOne
-    @JoinColumn(name = "login_id", referencedColumnName = "loginId")  // User 엔티티의 loginId 필드 참조
-    private User user;
 
     public Long getEmailVerificationId() {
         return emailVerificationId;
@@ -50,11 +46,5 @@ public class EmailVerification {
         this.verificationStatus = verificationStatus;
     }
 
-    public User getUser() {
-        return user;
-    }
 
-    public void setUser(User user) {
-        this.user = user;
-    }
 }

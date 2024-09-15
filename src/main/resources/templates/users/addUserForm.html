@@ -1,11 +1,10 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
-
 <head>
     <meta charset="UTF-8">
     <title>회원 가입</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
-
 <body>
 <div class="container">
     <h1>회원 가입</h1>
@@ -43,6 +42,12 @@
         <div>
             <label for="email">Email:</label>
             <input type="email" id="email" name="email" required maxlength="50">
+            <button type="button" onclick="sendVerificationEmail()">이메일 인증하기</button>
+        </div>
+        <!-- 이메일 인증 토큰 입력 필드 추가 -->
+        <div>
+            <label for="token">인증 토큰:</label>
+            <input type="text" id="token" name="token" placeholder="이메일로 받은 토큰을 입력하세요" required />
         </div>
         <div>
             <label for="emailYn">Email Subscription:</label>
@@ -56,6 +61,31 @@
         </div>
     </form>
 </div>
-</body>
 
+<script>
+    // 이메일 인증을 위한 자바스크립트 함수
+    function sendVerificationEmail() {
+        var email = document.getElementById("email").value; // 이메일 입력 필드의 값을 가져옵니다.
+
+        if (!email) {
+            alert("이메일을 입력해 주세요.");
+            return;
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "/email/send", // 이메일 전송을 처리하는 서버 엔드포인트
+            data: JSON.stringify({ email: email }),
+            contentType: "application/json; charset=utf-8",
+            success: function(response) {
+                alert("인증 메일이 발송되었습니다.");
+            },
+            error: function(xhr, status, error) {
+                alert("이메일 전송에 실패하였습니다. 다시 시도해 주세요.");
+                console.error("Error: " + error);
+            }
+        });
+    }
+</script>
+</body>
 </html>

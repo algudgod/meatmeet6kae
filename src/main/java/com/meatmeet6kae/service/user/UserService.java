@@ -33,7 +33,11 @@ public class UserService {
     }
     //사용자 추가 메서드
     public User addUser(User user) {
-        return userRepository.save(user);  // Repository를 통해 사용자 저장
+        // 사용자를 추가하기 전에 이메일 중복을 확인하기 위한 코드 추가-0917
+        if (userRepository.existsByEmail(user.getEmail())) {
+            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+        }
+            return userRepository.save(user);  // Repository를 통해 사용자 저장
     }
 
     //Optional<User>를 사용해 로그인 처리
@@ -52,6 +56,12 @@ public class UserService {
     public User updateUser(User user) {
         // 데이터베이스에 사용자 정보 업데이트
         return userRepository.save(user);
+    }
+    // 이메일이 이미 사용 중인지 확인하는 메서드
+    public boolean existsByEmail(String email) {
+        boolean exists = userRepository.existsByEmail(email);
+        logger.debug("Checking if email is already in use: {}", email); // 이메일 중복 확인 로그 출력
+        return exists;
     }
 }
 

@@ -42,12 +42,14 @@
         <div>
             <label for="email">Email:</label>
             <input type="email" id="email" name="email" required maxlength="50">
-            <button type="button" onclick="sendVerificationEmail()">이메일 인증하기</button>
+            <button type="button" onclick="sendVerificationEmail()">이메일 발송하기</button>
         </div>
         <!-- 이메일 인증 토큰 입력 필드 추가 -->
         <div>
             <label for="token">인증 토큰:</label>
-            <input type="text" id="token" name="token" placeholder="이메일로 받은 토큰을 입력하세요" required />
+            <input type="text" id="token" name="token" placeholder="이메일로 전송된 토큰을 입력하세요" required />
+            <!-- 인증 확인 버튼 추가 -->
+            <button type="button" onclick="verifyToken()">인증하기</button>
         </div>
         <div>
             <label for="emailYn">Email Subscription:</label>
@@ -72,16 +74,49 @@
             return;
         }
 
-        $.ajax({
-            type: "POST",
-            url: "/email/send", // 이메일 전송을 처리하는 서버 엔드포인트
-            data: JSON.stringify({ email: email }),
-            contentType: "application/json; charset=utf-8",
-            success: function(response) {
+    $.ajax({
+        type: "POST",
+        url: "/email/send",
+        data: JSON.stringify({ email: email }),
+        contentType: "application/json; charset=utf-8",
+        success: function(response) {
+            if (response.success) {
                 alert("인증 메일이 발송되었습니다.");
+            } else {
+                // 이미 가입된 이메일인 경우
+                alert(response.message || "이미 가입된 이메일 입니다.");
+            }
+        },
+        error: function(xhr, status, error) {
+            alert("이메일 전송에 실패하였습니다. 다시 시도해 주세요.");
+            console.error("Error: " + error);
+        }
+    });
+    }
+
+    // 토큰을 확인하여 인증 완료하는 함수
+    function verifyToken() {
+        var token = document.getElementById("token").value;
+
+        if (!token) {
+            alert("인증 토큰을 입력해 주세요.");
+            return;
+        }
+
+        // 서버에 토큰 검증 요청을 보냅니다.
+        $.ajax({
+            type: "GET",
+            url: "/email/confirm",
+            data: { token: token },
+            success: function(response) {
+                if (response.success) {
+                    alert("인증이 성공적으로 완료되었습니다.");
+                } else {
+                    alert("인증에 실패하였습니다. 토큰을 다시 확인해 주세요.");
+                }
             },
             error: function(xhr, status, error) {
-                alert("이메일 전송에 실패하였습니다. 다시 시도해 주세요.");
+                alert("인증 확인에 실패하였습니다. 다시 시도해 주세요.");
                 console.error("Error: " + error);
             }
         });

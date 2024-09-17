@@ -63,19 +63,26 @@ public class UserController {
     }
 
     @PostMapping("/addUser")
-    public String addUser(@ModelAttribute User newUser,@RequestParam("token") String token, Model model) {
-        // 토큰을 기반으로 이메일 인증 확인 -0915 코드추가
+    public String addUser(@ModelAttribute User newUser, @RequestParam("token") String token, Model model) {
+/*        // 토큰을 기반으로 이메일 인증 확인 -0915 코드추가
         if (!emailVerificationService.isEmailVerified(token)) {
             // 이메일 인증이 되지 않은 경우
             model.addAttribute("error", "이메일 인증이 필요합니다.");
             return "users/addUserForm"; // 가입 폼으로 다시 이동
-        }
+        } addUserForm.html에 인증확인버튼을 통한 인증으로 변경하여 코드 제거 후 중복확인 시작 */
 
-        // 이메일 인증이 된 경우에만 사용자 추가
-        userService.addUser(newUser);
-        model.addAttribute("user", newUser);
-        return "users/addUser";
+        try {
+            // 사용자 추가 메서드 호출
+            User savedUser = userService.addUser(newUser);
+            model.addAttribute("user", savedUser); // 추가된 사용자 정보를 모델에 추가
+            return "users/addUser"; // 회원가입 완료 페이지로 이동
+        } catch (IllegalArgumentException e) {
+            // 이메일 중복 등으로 인해 오류 발생 시
+            model.addAttribute("error", e.getMessage()); // 에러 메시지를 모델에 추가
+            return "users/addUserForm"; // 가입 폼으로 다시 이동
+        }
     }
+
 
     // 로그인 폼을 보여주는 메서드
     @GetMapping("/login")

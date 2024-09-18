@@ -11,19 +11,20 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class HomeController {
 
+    // 로그를 남기기 위한 Logger 객체 설정: DEBUG
     private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 
 
-    @GetMapping("/home")
+    @GetMapping("/")
     public String home(HttpSession session, Model model) {
-
-        logger.debug("home in");
 
         User currentUser = (User) session.getAttribute("user");
         if (currentUser != null) {
             // 로그인된 사용자 정보 전달
             model.addAttribute("user", currentUser);
         }
+        logger.debug("home in");
+        System.out.println("home in");
         return "home";  // home.html 템플릿 반환
     }
 

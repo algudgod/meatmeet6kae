@@ -4,13 +4,13 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "user")
+@Entity //JPA 엔티티
+@Table(name = "user") //이 엔티티가 매핑될 데이터베이스 테이블 이름을 지정
 public class User {
 
-    @Id
+    @Id //기본 키(primary key)로 사용할 필드
     private String loginId;
-    @Column(name = "use_yn", nullable = false, insertable = false) //insert할 때 포함하지 않는다. default=Y
+    @Column(name = "use_yn", nullable = false, insertable = false) //INSERT할 때 포함하지 않는다. default=Y
     private String useYn;
     private String password;
     private String name;
@@ -19,15 +19,11 @@ public class User {
     private String addr;
     private String email;
     private String emailYn;
-    @Column(name = "create_date", updatable = false) //값 설정 이후 변경 금지
+    @Column(name = "create_date", updatable = false, insertable = false) //엔티티가 생성될 때 설정되고 이후 변경 금지
     private LocalDateTime createDate;
-    @Column(name = "withdraw_date", nullable = true) // default=NULL
+    @Column(name = "withdraw_date", nullable = true) // 사용자가 탈퇴한 날짜, default=NULL
     private LocalDateTime withdrawDate;
 
-    @PrePersist
-    protected void onCreate() {
-        this.createDate = LocalDateTime.now(); // 엔티티가 처음 생성될 때 현재 시간 자동 저장
-    }
 
     // Getters and Setters
     public String getLoginId() {

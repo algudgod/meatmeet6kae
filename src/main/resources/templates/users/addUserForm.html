@@ -8,10 +8,12 @@
 <body>
 <div class="container">
     <h1>회원 가입</h1>
-    <form action="/users/addUser" method="post">
+    <form id="registrationForm" action="/users/addUser" method="post" onsubmit="return checkBeforeSubmit();">
         <div>
             <label for="loginId">Login ID:</label>
             <input type="text" id="loginId" name="loginId" required maxlength="20">
+            <button type="button" onclick="checkLoginId()">중복 확인</button>
+            <div id="loginIdCheckResult"></div> <!-- 아이디 중복 확인 내용 출력 -->
         </div>
         <div>
             <label for="password">Password:</label>
@@ -47,7 +49,7 @@
         <!-- 이메일 인증 토큰 입력 필드 추가 -->
         <div>
             <label for="token">인증 토큰:</label>
-            <input type="text" id="token" name="token" placeholder="이메일로 전송된 토큰을 입력하세요" required />
+            <input type="text" id="token" name="token" placeholder="이메일로 전송된 토큰을 입력하세요" required/>
             <!-- 인증 확인 버튼 추가 -->
             <button type="button" onclick="verifyToken()">인증하기</button>
         </div>
@@ -65,33 +67,65 @@
 </div>
 
 <script>
+
+    // 아이디 중복 확인 및 이메일 인증 상태를 저장하는 변수 -05리펙토링_0918
+    var isLoginIdChecked = false;
+    var isEmailVerified = false;
+
+    // loginId를 확인하기 위한 함수
+    function checkLoginId() {
+        const loginId = document.getElementById('loginId').value;
+
+    // 자바스크립트에서 먼저 길이 검사를 수행 -06리펙토링_0918
+    if (loginId.length < 5 || loginId.length > 20) {
+        alert("아이디는 5자 이상 20자 이하여야 합니다.");
+        return;
+    }
+        if (!loginId) {
+            alert("아이디를 입력하세요.");
+            return;
+        }
+
+        fetch(`/users/checkLoginId?loginId=${encodeURIComponent(loginId)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data) {
+                    document.getElementById('loginIdCheckResult').innerText = "이미 사용 중인 아이디입니다.";
+                    isLoginIdChecked = false;
+                } else {
+                    document.getElementById('loginIdCheckResult').innerText = "사용 가능한 아이디입니다.";
+                    isLoginIdChecked = true; // 사용 가능한 아이디로 확인되면 true
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
     // 이메일 인증을 위한 자바스크립트 함수
     function sendVerificationEmail() {
-        var email = document.getElementById("email").value; // 이메일 입력 필드의 값을 가져옵니다.
+        var email = document.getElementById("email").value;
 
         if (!email) {
             alert("이메일을 입력해 주세요.");
             return;
         }
 
-    $.ajax({
-        type: "POST",
-        url: "/email/send",
-        data: JSON.stringify({ email: email }),
-        contentType: "application/json; charset=utf-8",
-        success: function(response) {
-            if (response.success) {
-                alert("인증 메일이 발송되었습니다.");
-            } else {
-                // 이미 가입된 이메일인 경우
-                alert(response.message || "이미 가입된 이메일 입니다.");
+        $.ajax({
+            type: "POST",
+            url: "/email/send",
+            data: JSON.stringify({ email: email }),
+            contentType: "application/json; charset=utf-8",
+            success: function(response) {
+                if (response.success) {
+                    alert("인증 메일이 발송되었습니다.");
+                } else {
+                    alert(response.message || "이미 가입된 이메일 입니다.");
+                }
+            },
+            error: function(xhr, status, error) {
+                alert("이메일 전송에 실패하였습니다. 다시 시도해 주세요.");
+                console.error("Error: " + error);
             }
-        },
-        error: function(xhr, status, error) {
-            alert("이메일 전송에 실패하였습니다. 다시 시도해 주세요.");
-            console.error("Error: " + error);
-        }
-    });
+        });
     }
 
     // 토큰을 확인하여 인증 완료하는 함수
@@ -103,7 +137,6 @@
             return;
         }
 
-        // 서버에 토큰 검증 요청을 보냅니다.
         $.ajax({
             type: "GET",
             url: "/email/confirm",
@@ -111,15 +144,31 @@
             success: function(response) {
                 if (response.success) {
                     alert("인증이 성공적으로 완료되었습니다.");
+                    isEmailVerified = true; // 인증 성공시 true로 설정
                 } else {
                     alert("인증에 실패하였습니다. 토큰을 다시 확인해 주세요.");
+                    isEmailVerified = false;
                 }
             },
             error: function(xhr, status, error) {
                 alert("인증 확인에 실패하였습니다. 다시 시도해 주세요.");
                 console.error("Error: " + error);
+                isEmailVerified = false;
             }
         });
+    }
+
+    // 회원 가입 버튼 클릭 시 유효성 검사 함수
+    function checkBeforeSubmit() {
+        if (!isLoginIdChecked) {
+            alert("아이디 중복 확인을 해주세요.");
+            return false;
+        }
+        if (!isEmailVerified) {
+            alert("이메일 인증을 완료해주세요.");
+            return false;
+        }
+        return true;
     }
 </script>
 </body>

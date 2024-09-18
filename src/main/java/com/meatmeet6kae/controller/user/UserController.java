@@ -1,16 +1,18 @@
 package com.meatmeet6kae.controller.user;
 
+import com.meatmeet6kae.dto.user.UserDTO;
 import com.meatmeet6kae.entity.user.User;
-import com.meatmeet6kae.entity.verification.EmailVerification;
 import com.meatmeet6kae.service.user.UserService;
 import com.meatmeet6kae.service.verification.EmailVerificationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -19,7 +21,7 @@ import java.util.Optional;
 @RequestMapping("/users") //모든 메서드는 url이 /users로 매핑되어 시작한다.
 public class UserController {
 
-    // 로그를 남기기 위한 Logger 객체 설정: 디버깅용
+    // 로그를 남기기 위한 Logger 객체 설정: DEBUG
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     //UserService 주입: 서비스 계층 로직 호출
@@ -31,7 +33,7 @@ public class UserController {
     @GetMapping(value = "getUsers")
     public String getUsers(@RequestParam("loginId") String loginId, Model model, HttpSession session) {
 
-        logger.debug("getUsers called with loginId: {}", loginId); // 로그 찍기
+        logger.debug("getUsers called with loginId: {}", loginId); // DEBUG:
 
         User currentUser = (User) session.getAttribute("user"); //세션에 로그인된 사용자 정보
 
@@ -62,16 +64,24 @@ public class UserController {
         return "users/addUserForm";  // 회원 가입 폼.html
     }
 
+    // 사용자를 추가하는 메서드(+유효성 검증 추가 -05리펙토링_0918
     @PostMapping("/addUser")
-    public String addUser(@ModelAttribute User newUser, @RequestParam("token") String token, Model model) {
-/*        // 토큰을 기반으로 이메일 인증 확인 -0915 코드추가
-        if (!emailVerificationService.isEmailVerified(token)) {
-            // 이메일 인증이 되지 않은 경우
-            model.addAttribute("error", "이메일 인증이 필요합니다.");
-            return "users/addUserForm"; // 가입 폼으로 다시 이동
-        } addUserForm.html에 인증확인버튼을 통한 인증으로 변경하여 코드 제거 후 중복확인 시작 */
-
+    public String addUser(@ModelAttribute @Valid UserDTO userDTO, BindingResult bindingResult, Model model) {
+        if (bindingResult.hasErrors()) {
+            // 검증 실패한 필드와 메시지를 모델에 추가하여 화면에 표시
+            model.addAttribute("error", "입력한 정보에 오류가 있습니다.");
+            // 유효성 검사에 실패한 경우, 오류 메시지와 함께 가입 폼으로 다시 이동
+            return "users/addUserForm";
+        }
         try {
+            // DTO를 엔티티로 변환
+            User newUser = new User();
+            newUser.setLoginId(userDTO.getLoginId());
+            newUser.setPassword(userDTO.getPassword());
+            newUser.setName(userDTO.getName());
+            newUser.setEmail(userDTO.getEmail());
+            // 필요한 경우, 다른 필드들도 복사
+
             // 사용자 추가 메서드 호출
             User savedUser = userService.addUser(newUser);
             model.addAttribute("user", savedUser); // 추가된 사용자 정보를 모델에 추가
@@ -82,7 +92,6 @@ public class UserController {
             return "users/addUserForm"; // 가입 폼으로 다시 이동
         }
     }
-
 
     // 로그인 폼을 보여주는 메서드
     @GetMapping("/login")
@@ -214,11 +223,17 @@ public class UserController {
         return "redirect:/home";  // 탈퇴 후 홈으로 리다이렉트
     }
 
+    // Id 중복 확인
+    @GetMapping("/checkLoginId")
+    @ResponseBody
+    public boolean checkLoginId(@RequestParam("loginId") String loginId) {
+        return userService.existsByLoginId(loginId);
+    }
+
     //ID찾기 폼을 보여주는 메서드
     @GetMapping("/findUserIdForm")
     public String findUserIdForm() {
         return "users/findUserId";
     }
-
 
 }

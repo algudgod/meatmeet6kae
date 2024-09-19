@@ -1,5 +1,6 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>회원 가입</title>
@@ -8,66 +9,101 @@
 <body>
 <div class="container">
     <h1>회원 가입</h1>
-    <form id="registrationForm" action="/users/addUser" method="post" onsubmit="return checkBeforeSubmit();">
+    <form id="registrationForm" action="/users/addUser" method="post" onsubmit="prepareEmail(); return checkBeforeSubmit();">
         <div>
-            <label for="loginId">Login ID:</label>
+            <label for="loginId">아이디: </label>
+            <!--name을 기준으로 서버 바인딩-->
             <input type="text" id="loginId" name="loginId" required maxlength="20">
             <button type="button" onclick="checkLoginId()">중복 확인</button>
             <div id="loginIdCheckResult"></div> <!-- 아이디 중복 확인 내용 출력 -->
         </div>
         <div>
-            <label for="password">Password:</label>
+            <label for="password">비밀번호: </label>
             <input type="password" id="password" name="password" required maxlength="100">
         </div>
         <div>
-            <label for="name">Name:</label>
+            <label for="confirmPassword">비밀번호 확인: </label>
+            <input type="password" id="confirmPassword" name="confirmPassword" required maxlength="100">
+            <button type="button" onclick="checkPassword()">비밀번호 확인</button>
+            <div id="passwordCheckResult"></div> <!-- 비밀번호 일치 여부 내용 출력 -->
+        </div>
+        <div>
+            <label for="name">이름: </label>
             <input type="text" id="name" name="name" required maxlength="50">
         </div>
+
         <div>
-            <label for="role">Role:</label>
-            <select id="role" name="role" required>
-                <option value="USER">User</option>
-                <option value="ADMIN">Admin</option>
-            </select>
-        </div>
-        <div>
-            <label for="gender">Gender:</label>
+            <label for="gender">성별: </label>
             <input type="radio" id="gender_male" name="gender" value="M" required>
             <label for="gender_male">Male</label>
             <input type="radio" id="gender_female" name="gender" value="F" required>
             <label for="gender_female">Female</label>
         </div>
+        <p></p>
         <div>
-            <label for="addr">Address:</label>
-            <input type="text" id="addr" name="addr" maxlength="100">
+            <label for="addr_postcode">우편번호:</label>
+            <input type="text" id="addr_postcode" name="postcode" readonly placeholder="우편번호">
+            <input type="button" onclick="daumPostcode()" value="우편번호 찾기">
         </div>
         <div>
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required maxlength="50">
+            <label for="addr">주소:</label>
+            <input type="text" id="addr" name="addr" readonly placeholder="주소" maxlength="100">
+        </div>
+        <div>
+            <label for="addr_detailAddress">상세주소:</label>
+            <input type="text" id="addr_detailAddress" name="addrDetail" placeholder="상세주소" maxlength="100">
+        </div>
+        <div>
+            <label for="addr_extraAddress">참고항목:</label>
+            <input type="text" id="addr_extraAddress" name="addrExtraAddress" readonly placeholder="참고항목">
+        </div>
+        <p></p>
+
+        <!-- hidden input field for the full email -->
+        <input type="hidden" id="email" name="email">
+        <div>
+            <label for="emailId">이메일:</label>
+            <input type="text" id="emailId" name="emailId" required>
+            @
+            <input type="text" id="emailDomain" name="emailDomain" required list="domains">
+            <datalist id="domains">
+                <option value="gmail.com">
+                <option value="naver.com">
+                <option value="hanmail.net">
+            </datalist>
             <button type="button" onclick="sendVerificationEmail()">이메일 발송하기</button>
         </div>
+
         <!-- 이메일 인증 토큰 입력 필드 추가 -->
         <div>
             <label for="token">인증 토큰:</label>
             <input type="text" id="token" name="token" placeholder="이메일로 전송된 토큰을 입력하세요" required/>
             <!-- 인증 확인 버튼 추가 -->
             <button type="button" onclick="verifyToken()">인증하기</button>
+            <div id="tokenCheckResult"></div> <!-- 인증 여부 출력-->
+
         </div>
         <div>
-            <label for="emailYn">Email Subscription:</label>
+            <label for="emailYn">이메일 구독하기: </label>
             <input type="radio" id="email_yn_yes" name="emailYn" value="Y" required>
             <label for="email_yn_yes">Yes</label>
             <input type="radio" id="email_yn_no" name="emailYn" value="N" required>
             <label for="email_yn_no">No</label>
         </div>
+        <p></p>
         <div>
             <button type="submit">회원 가입</button>
+            <p></p>
         </div>
     </form>
 </div>
 
-<script>
 
+<!-- 자바스크립트 코드 -->
+
+<!-- 회원 가입에 필요한 자바스크립트 함수 시작 -->
+<!-- 입력 및 중복에 관련된 유효성검사 시작-->
+<script>
     // 아이디 중복 확인 및 이메일 인증 상태를 저장하는 변수 -05리펙토링_0918
     var isLoginIdChecked = false;
     var isEmailVerified = false;
@@ -76,11 +112,11 @@
     function checkLoginId() {
         const loginId = document.getElementById('loginId').value;
 
-    // 자바스크립트에서 먼저 길이 검사를 수행 -06리펙토링_0918
-    if (loginId.length < 5 || loginId.length > 20) {
-        alert("아이디는 5자 이상 20자 이하여야 합니다.");
-        return;
-    }
+        // 자바스크립트에서 먼저 길이 검사를 수행 -06리펙토링_0918
+        if (loginId.length < 5 || loginId.length > 20) {
+            alert("아이디는 5자 이상 20자 이하여야 합니다.");
+            return;
+        }
         if (!loginId) {
             alert("아이디를 입력하세요.");
             return;
@@ -100,37 +136,81 @@
             .catch(error => console.error('Error:', error));
     }
 
+    //password를 확인하기 위한 함수
+    function checkPassword() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const passwordCheckResult = document.getElementById('passwordCheckResult');
+
+        // 비밀번호가 비어 있는지 확인
+        if (!password) {
+            alert("비밀번호를 입력하세요.");
+            return false;
+        }
+        // 비밀번호 길이 검사, 유효성 검증 -06리팩토링_0919
+        if (password.length < 6 || password.length > 100) {
+            alert("비밀번호는 6자 이상 100자 이하여야 합니다.");
+            return false;
+        }
+        // 비밀번호 일치 확인 -07리팩토링_0919
+        if (password !== confirmPassword) {
+            passwordCheckResult.innerText = "비밀번호가 일치하지 않습니다.";
+            return false;
+        }
+        passwordCheckResult.innerText = "비밀번호가 일치합니다.";
+        return true;
+    }
+
+    // 이메일을 합쳐주는 함수 -07리펙토링_0919
+    function getFullEmail() {
+        var emailId = document.getElementById('emailId').value;
+        var emailDomain = document.getElementById('emailDomain').value;
+        return emailId + '@' + emailDomain;
+    }
+
+    // 이메일을 합쳐서 hidden input에 설정하는 함수 -07리펙토링_0919
+    function prepareEmail() {
+        var fullEmail = getFullEmail();
+
+        // Set the full email to the hidden input field
+        document.getElementById('email').value = fullEmail;
+
+        return true; // Continue to submit the form
+    }
+
     // 이메일 인증을 위한 자바스크립트 함수
     function sendVerificationEmail() {
-        var email = document.getElementById("email").value;
+        var fullEmail = getFullEmail();
 
-        if (!email) {
-            alert("이메일을 입력해 주세요.");
+        if (!fullEmail.includes('@')) {
+            alert("정확한 형식의 이메일이 아닙니다.");
             return;
         }
 
-        $.ajax({
-            type: "POST",
-            url: "/email/send",
-            data: JSON.stringify({ email: email }),
-            contentType: "application/json; charset=utf-8",
-            success: function(response) {
-                if (response.success) {
-                    alert("인증 메일이 발송되었습니다.");
-                } else {
-                    alert(response.message || "이미 가입된 이메일 입니다.");
-                }
-            },
-            error: function(xhr, status, error) {
-                alert("이메일 전송에 실패하였습니다. 다시 시도해 주세요.");
-                console.error("Error: " + error);
+    // AJAX 요청을 사용하여 서버에 이메일 발송 요청
+    $.ajax({
+        type: "POST",
+        url: "/email/send",
+        data: JSON.stringify({ email: fullEmail }),
+        contentType: "application/json; charset=utf-8",
+        success: function(response) {
+            if (response.success) {
+                alert("인증 메일이 발송되었습니다.");
+            } else {
+                alert(response.message || "이미 가입된 이메일 입니다.");
             }
-        });
-    }
+        },
+        error: function(xhr, status, error) {
+            alert("이메일 전송에 실패하였습니다. 다시 시도해 주세요.");
+            console.error("Error: " + error);
+        }
+    });
+}
 
     // 토큰을 확인하여 인증 완료하는 함수
     function verifyToken() {
         var token = document.getElementById("token").value;
+        const tokenCheckResult = document.getElementById('tokenCheckResult');
 
         if (!token) {
             alert("인증 토큰을 입력해 주세요.");
@@ -143,10 +223,10 @@
             data: { token: token },
             success: function(response) {
                 if (response.success) {
-                    alert("인증이 성공적으로 완료되었습니다.");
+                    tokenCheckResult.innerText = "인증이 완료되었습니다.";
                     isEmailVerified = true; // 인증 성공시 true로 설정
                 } else {
-                    alert("인증에 실패하였습니다. 토큰을 다시 확인해 주세요.");
+                    tokenCheckResult.innerText = "인증이 실패했습니다.";
                     isEmailVerified = false;
                 }
             },
@@ -158,18 +238,100 @@
         });
     }
 
-    // 회원 가입 버튼 클릭 시 유효성 검사 함수
+    // 회원 가입 버튼 클릭 시 최종 유효성 검사 함수
     function checkBeforeSubmit() {
+        // 아이디 중복 확인 여부 검사
         if (!isLoginIdChecked) {
             alert("아이디 중복 확인을 해주세요.");
             return false;
         }
+        // 비밀번호 유효성 검사 및 일치 확인
+        if (!checkPassword()) {
+            return false;
+        }
+        // 이메일 인증 여부 검사
         if (!isEmailVerified) {
             alert("이메일 인증을 완료해주세요.");
             return false;
         }
+        // 모든 검증 통과 시 폼 제출 진행
         return true;
     }
 </script>
+<!-- 입력 및 중복에 관련된 유효성검사 종료-->
+
+<!-- 다음 주소 검색 API 스크립트 -->
+<script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script>
+    //본 예제에서는 도로명 주소 표기 방식에 대한 법령에 따라, 내려오는 데이터를 조합하여 올바른 주소를 구성하는 방법을 설명합니다.
+    //Daum Postcode Service API
+    function daumPostcode() {
+        new daum.Postcode({
+            oncomplete: function(data) {
+                // 팝업에서 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
+
+                // 도로명 주소의 노출 규칙에 따라 주소를 표시한다.
+                // 내려오는 변수가 값이 없는 경우엔 공백('')값을 가지므로, 이를 참고하여 분기 한다.
+                var roadAddr = data.roadAddress; // 도로명 주소 변수
+                var extraRoadAddr = ''; // 참고 항목 변수
+
+                // 법정동명이 있을 경우 추가한다. (법정리는 제외)
+                // 법정동의 경우 마지막 문자가 "동/로/가"로 끝난다.
+                if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
+                    extraRoadAddr += data.bname;
+                }
+                // 건물명이 있고, 공동주택일 경우 추가한다.
+                if(data.buildingName !== '' && data.apartment === 'Y'){
+                   extraRoadAddr += (extraRoadAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                }
+                // 표시할 참고항목이 있을 경우, 괄호까지 추가한 최종 문자열을 만든다.
+                if(extraRoadAddr !== ''){
+                    extraRoadAddr = ' (' + extraRoadAddr + ')';
+                }
+
+                // 우편번호와 주소 정보를 해당 필드에 넣는다.
+                document.getElementById('addr_postcode').value = data.zonecode;
+                document.getElementById("addr").value = roadAddr;
+                //document.getElementById("addr_jibunAddress").value = data.jibunAddress;
+                // jibsAddress 필드 사용하지 않으므로 주석 처리
+
+                // 참고항목 문자열이 있을 경우 해당 필드에 넣는다.
+                document.getElementById("addr_extraAddress").value = extraRoadAddr || '';
+
+                /* 다음에서 가져온 코드 중 사용하지 않는 부분이라 주석처리
+                var guideTextBox = document.getElementById("guide");
+                if(data.autoRoadAddress) {
+                    var expRoadAddr = data.autoRoadAddress + extraRoadAddr;
+                    guideTextBox.innerHTML = '(예상 도로명 주소 : ' + expRoadAddr + ')';
+                    guideTextBox.style.display = 'block';
+                } else if(data.autoJibunAddress) {
+                    var expJibunAddr = data.autoJibunAddress;
+                    guideTextBox.innerHTML = '(예상 지번 주소 : ' + expJibunAddr + ')';
+                    guideTextBox.style.display = 'block';
+                } else {
+                    guideTextBox.innerHTML = '';
+                    guideTextBox.style.display = 'none';
+                }
+                */
+            }
+        }).open();
+    }
+</script>
+
+<script>
+    // 이메일을 합쳐서 hidden input에 설정하는 함수
+    function prepareEmail() {
+        var emailId = document.getElementById('emailId').value;
+        var emailDomain = document.getElementById('emailDomain').value;
+        var fullEmail = emailId + '@' + emailDomain;
+
+        // Set the full email to the hidden input field
+        document.getElementById('email').value = fullEmail;
+
+        return true; // Continue to submit the form
+    }
+</script>
+<!-- 회원 가입에 필요한 자바스크립트 함수 종료 -->
+
 </body>
 </html>

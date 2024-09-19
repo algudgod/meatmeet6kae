@@ -5,6 +5,7 @@ import com.meatmeet6kae.repository.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -75,5 +76,18 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    //사용자 탈퇴 메서드
+    public void deactivateUser(String loginId) {
+        //레포지토리에서 사용자를 loginId로 검색해서 찾고 반환한다.
+        //람다(매개변수)->{실행코드, 한줄이면 중괄호 생략가능}를 사용해서 예외를 생성하고 메세지를 설정하고 던져본다.
+        User user = userRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        if ("Y".equals(user.getUseYn())) {
+            user.setUseYn("N");
+            user.setWithdrawDate(LocalDateTime.now());
+            userRepository.save(user);
+        }
+    }
 }
 

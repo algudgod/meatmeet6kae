@@ -46,11 +46,9 @@
 
     <div class="info-row">
         <span class="info-label">가입일:</span>
-        <span class="info-value" th:text="${user.createDate}">20240901</span>
+        <span class="info-value" th:text="${#temporals.format(user.createDate, 'yyyy년 MM월 dd일')}"></span><!--07리팩토링_0919-->
     </div>
-
     </div>
-
 
     <div class="action-buttons">
         <a href="/users/updateUserForm" class="button">정보 수정</a>

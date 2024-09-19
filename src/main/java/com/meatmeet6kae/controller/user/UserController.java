@@ -15,6 +15,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Optional;
 
 @Controller //Spring MVC 패턴을 사용한 사용자 관리 컨트롤러
@@ -49,7 +50,7 @@ public class UserController {
 
         User currentUser = (User) session.getAttribute("user"); //세션에 로그인된 사용자 정보
         if(currentUser == null){ //로그인 안 된 경우 home으로 return
-            return "redirect:/home";
+            return "redirect:/";
         }
         logger.debug("getUser called with loginId: {}", currentUser.getLoginId()); // 로그 찍기
 
@@ -64,10 +65,18 @@ public class UserController {
         return "users/addUserForm";  // 회원 가입 폼.html
     }
 
-    // 사용자를 추가하는 메서드(+유효성 검증 추가 -05리펙토링_0918
+    // 사용자를 추가하는 메서드 -05리펙토링_0918
     @PostMapping("/addUser")
-    public String addUser(@ModelAttribute @Valid UserDTO userDTO, BindingResult bindingResult, Model model) {
+    public String addUser(@ModelAttribute @Valid UserDTO userDTO, BindingResult bindingResult, Model model,
+                          @RequestParam Map<String, String> params) { //html에 있는 우편정보 가져오기 위한 Map_0919
+
+        // 데이터 확인을 위해 로그 추가
+        logger.debug("UserDTO: {}", userDTO);
+        logger.debug("Params: {}", params);
+
         if (bindingResult.hasErrors()) {
+            logger.debug("BindingResult errors: {}", bindingResult.getAllErrors());
+
             // 검증 실패한 필드와 메시지를 모델에 추가하여 화면에 표시
             model.addAttribute("error", "입력한 정보에 오류가 있습니다.");
             // 유효성 검사에 실패한 경우, 오류 메시지와 함께 가입 폼으로 다시 이동
@@ -79,12 +88,32 @@ public class UserController {
             newUser.setLoginId(userDTO.getLoginId());
             newUser.setPassword(userDTO.getPassword());
             newUser.setName(userDTO.getName());
-            newUser.setEmail(userDTO.getEmail());
-            // 필요한 경우, 다른 필드들도 복사
+            newUser.setEmail(userDTO.getEmail()); //생성한 이메일 주소를 설정
+
+            //존재하는 addr을 위해 @RequestParam 하여 값 불러오기
+            newUser.setAddr(params.get("addr")); //주소
+            String postcode = params.get("postcode"); //우편번호
+            String addrDetail = params.get("addrDetail"); //상세주소
+            String addrExtraAddress = params.get("addrExtraAddress"); // 참고항목
+
+            // 로그로 확인
+            logger.debug("Addr: {}", newUser.getAddr());
+            logger.debug("Postcode: {}", postcode);
+            logger.debug("AddrDetail: {}", addrDetail);
+            logger.debug("AddrExtraAddress: {}", addrExtraAddress);
 
             // 사용자 추가 메서드 호출
             User savedUser = userService.addUser(newUser);
             model.addAttribute("user", savedUser); // 추가된 사용자 정보를 모델에 추가
+            model.addAttribute("postcode", postcode);
+            model.addAttribute("addrDetail", addrDetail);
+            model.addAttribute("addrExtraAddress", addrExtraAddress);
+
+            logger.debug("User added successfully: {}", savedUser);
+            logger.debug("Model attributes set: user={}, postcode={}, addrDetail={}, addrExtraAddress={}",
+                    savedUser, postcode, addrDetail, addrExtraAddress);
+
+
             return "users/addUser"; // 회원가입 완료 페이지로 이동
         } catch (IllegalArgumentException e) {
             // 이메일 중복 등으로 인해 오류 발생 시
@@ -115,7 +144,7 @@ public class UserController {
             }
             // 로그인 성공 - 세션에 사용자 정보 저장
             session.setAttribute("user", user);
-            return "redirect:/home";  // 로그인 성공 후 홈으로 리다이렉트
+            return "redirect:/";  // 로그인 성공 후 홈으로 리다이렉트
         } else {
             // 로그인 실패 - 에러 메시지 전달
             model.addAttribute("error", "ID 또는 PASSWORD가 잘못 입력 되었습니다.");
@@ -141,7 +170,7 @@ public class UserController {
         // 로그아웃 후 세션 무효화 로그
         logger.debug("Session invalidated. logout.");
 
-        return "redirect:/home";  // 로그아웃 후 홈 페이지로 리다이렉트
+        return "redirect:/";  // 로그아웃 후 홈 페이지로 리다이렉트
     }
 
     //내 정보 보기 폼을 보여주는 메서드
@@ -212,15 +241,16 @@ public class UserController {
         if (currentUser == null) {
             return "redirect:/users/login";
         }
-
+/*      서비스로 로직 이동
         // 탈퇴 처리: useYn을 'N'으로 설정
         currentUser.setUseYn("N");
-        userService.updateUser(currentUser); // DB에 업데이트
+        userService.updateUser(currentUser); // DB에 업데이트*/
+        userService.deactivateUser(currentUser.getLoginId());
 
         // 세션에서 사용자 정보 제거 (로그아웃 처리)
         session.invalidate();
 
-        return "redirect:/home";  // 탈퇴 후 홈으로 리다이렉트
+        return "redirect:/";  // 탈퇴 후 홈으로 리다이렉트
     }
 
     // Id 중복 확인

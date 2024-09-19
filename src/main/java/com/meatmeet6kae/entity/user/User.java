@@ -14,6 +14,7 @@ public class User {
     private String useYn;
     private String password;
     private String name;
+    @Column(name = "role", nullable = false, insertable = false) //INSERT할 때 포함하지 않는다. default=USER
     private String role;
     private String gender;
     private String addr;

@@ -4,98 +4,139 @@
 <head>
     <meta charset="UTF-8">
     <title>회원 가입</title>
+
+    <link rel="stylesheet" href="/css/styles.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 </head>
+
 <body>
-<div class="container">
-    <h1>회원 가입</h1>
-    <form id="registrationForm" action="/users/addUser" method="post" onsubmit="prepareEmail(); return checkBeforeSubmit();">
-        <div>
-            <label for="loginId">아이디: </label>
-            <!--name을 기준으로 서버 바인딩-->
-            <input type="text" id="loginId" name="loginId" required maxlength="20">
-            <button type="button" onclick="checkLoginId()">중복 확인</button>
-            <div id="loginIdCheckResult"></div> <!-- 아이디 중복 확인 내용 출력 -->
-        </div>
-        <div>
-            <label for="password">비밀번호: </label>
-            <input type="password" id="password" name="password" required maxlength="100">
-        </div>
-        <div>
-            <label for="confirmPassword">비밀번호 확인: </label>
-            <input type="password" id="confirmPassword" name="confirmPassword" required maxlength="100">
-            <button type="button" onclick="checkPassword()">비밀번호 확인</button>
-            <div id="passwordCheckResult"></div> <!-- 비밀번호 일치 여부 내용 출력 -->
-        </div>
-        <div>
-            <label for="name">이름: </label>
-            <input type="text" id="name" name="name" required maxlength="50">
+<!-- Navigation (공통 헤더) -->
+<div th:replace="~{common/header :: header}"></div>
+
+<!-- 회원가입 -->
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-4">
+        <h1 class="text-center mb-4">회원 가입</h1>
+
+        <!-- 구분선 추가 -->
+        <div class="d-flex justify-content-center">
+            <hr style="width: 100%; border: 1px solid #000;">
         </div>
 
-        <div>
-            <label for="gender">성별: </label>
-            <input type="radio" id="gender_male" name="gender" value="M" required>
-            <label for="gender_male">Male</label>
-            <input type="radio" id="gender_female" name="gender" value="F" required>
-            <label for="gender_female">Female</label>
-        </div>
-        <p></p>
-        <div>
-            <label for="addr_postcode">우편번호:</label>
-            <input type="text" id="addr_postcode" name="postcode" readonly placeholder="우편번호">
-            <input type="button" onclick="daumPostcode()" value="우편번호 찾기">
-        </div>
-        <div>
-            <label for="addr">주소:</label>
-            <input type="text" id="addr" name="addr" readonly placeholder="주소" maxlength="100">
-        </div>
-        <div>
-            <label for="addr_detailAddress">상세주소:</label>
-            <input type="text" id="addr_detailAddress" name="addrDetail" placeholder="상세주소" maxlength="100">
-        </div>
-        <div>
-            <label for="addr_extraAddress">참고항목:</label>
-            <input type="text" id="addr_extraAddress" name="addrExtraAddress" readonly placeholder="참고항목">
-        </div>
-        <p></p>
+        <form id="registrationForm" action="/users/addUser" method="post" onsubmit="prepareEmail(); return checkBeforeSubmit();">
+            <div class="mb-3">
+                <div class="input-group">
+                    <input type="text" id="loginId" name="loginId" class="form-control" required maxlength="20" placeholder="아이디를 입력하세요">
+                    <button type="button" class="btn btn-outline-dark" onclick="checkLoginId()">중복 확인</button>
+                </div>
+                <div id="loginIdCheckResult" class="text-danger mt-2"></div> <!-- 아이디 중복 확인 내용 출력 -->
+            </div>
 
-        <!-- hidden input field for the full email -->
-        <input type="hidden" id="email" name="email">
-        <div>
-            <label for="emailId">이메일:</label>
-            <input type="text" id="emailId" name="emailId" required>
-            @
-            <input type="text" id="emailDomain" name="emailDomain" required list="domains">
-            <datalist id="domains">
-                <option value="gmail.com">
-                <option value="naver.com">
-                <option value="hanmail.net">
-            </datalist>
-            <button type="button" onclick="sendVerificationEmail()">이메일 발송하기</button>
-        </div>
+            <div class="mb-3">
+                <input type="password" id="password" name="password" class="form-control" required maxlength="100" placeholder="비밀번호를 입력하세요">
+            </div>
 
-        <!-- 이메일 인증 토큰 입력 필드 추가 -->
-        <div>
-            <label for="token">인증 토큰:</label>
-            <input type="text" id="token" name="token" placeholder="이메일로 전송된 토큰을 입력하세요" required/>
-            <!-- 인증 확인 버튼 추가 -->
-            <button type="button" onclick="verifyToken()">인증하기</button>
-            <div id="tokenCheckResult"></div> <!-- 인증 여부 출력-->
+            <div class="mb-3">
+                <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" required maxlength="100" placeholder="비밀번호 확인">
+                <div id="passwordCheckResult" class="text-danger mt-2"></div> <!-- 비밀번호 일치 여부 내용 출력 -->
+            </div>
 
-        </div>
-        <div>
-            <label for="emailYn">이메일 구독하기: </label>
-            <input type="radio" id="email_yn_yes" name="emailYn" value="Y" required>
-            <label for="email_yn_yes">Yes</label>
-            <input type="radio" id="email_yn_no" name="emailYn" value="N" required>
-            <label for="email_yn_no">No</label>
-        </div>
-        <p></p>
-        <div>
-            <button type="submit">회원 가입</button>
-            <p></p>
-        </div>
-    </form>
+            <div class="row mb-3">
+                <!-- 이름과 성별을 한줄에 배치. 8:4 (총 12)-->
+                <div class="col-md-8">
+                    <input type="text" id="name" name="name" class="form-control" required maxlength="50" placeholder="이름">
+                </div>
+
+                <div class="col-md-4 d-flex align-items-center">
+                    <label class="me-2">성별:</label>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" id="gender_male" name="gender" value="M" required>
+                        <label class="form-check-label" for="gender_male">남</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" id="gender_female" name="gender" value="F" required>
+                        <label class="form-check-label" for="gender_female">여</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <div class="input-group">
+                <input type="text" id="addr_postcode" name="postcode" class="form-control" readonly placeholder="우편번호">
+                <input type="button" class="btn btn-outline-dark" onclick="daumPostcode()" value="우편번호 찾기">
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <input type="text" id="addr" name="addr" class="form-control" readonly placeholder="주소" maxlength="100">
+            </div>
+
+            <div class="mb-3">
+                <input type="text" id="addr_detailAddress" name="addrDetail" class="form-control" placeholder="상세주소를 입력해 주세요" maxlength="100">
+            </div>
+
+            <div class="mb-3">
+                <input type="text" id="addr_extraAddress" name="addrExtraAddress" class="form-control" readonly placeholder="비고">
+            </div>
+
+            <div class="mb-3">
+                <div class="input-group">
+                    <!-- 이메일 입력 -->
+                    <input type="text" id="emailId" name="emailId" class="form-control" style="flex: 0 0 40%;" required placeholder="이메일">
+
+                    <!-- @ 기호 -->
+                    <span class="input-group-text" style="background-color: transparent; border: none; color: inherit;">@</span>
+
+                    <!-- 도메인 입력 -->
+                    <input type="text" id="emailDomain" name="emailDomain" class="form-control" required list="domains" placeholder="도메인">
+                    <datalist id="domains">
+                        <option value="gmail.com">
+                        <option value="naver.com">
+                        <option value="hanmail.net">
+                    </datalist>
+
+                    <!-- 발송하기 버튼 -->
+                    <button type="button" class="btn btn-outline-dark" onclick="sendVerificationEmail()">발송하기</button>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <div class="input-group">
+                    <!-- 토큰 입력 -->
+                    <input type="text" id="token" name="token" class="form-control" placeholder="이메일로 전송된 토큰을 입력하세요" required>
+
+                    <!-- 인증하기 버튼 -->
+                    <button type="button" class="btn btn-outline-dark" onclick="verifyToken()">인증하기</button>
+                </div>
+
+                <!-- 인증 결과 메시지 출력 -->
+                <div id="tokenCheckResult" class="text-danger mt-2"></div>
+            </div>
+
+            <!-- 이메일 구독 여부 -->
+            <div class="row mb-3">
+                <div class="col-md-12 d-flex justify-content-center align-items-center">
+                    <label class="me-3">이메일 구독하기:</label>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" id="email_yn_yes" name="emailYn" value="Y" required>
+                        <label class="form-check-label" for="email_yn_yes">수신</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" id="email_yn_no" name="emailYn" value="N" required>
+                        <label class="form-check-label" for="email_yn_no">차단</label>
+                    </div>
+                </div>
+            </div>
+
+            <input type="hidden" id="email" name="email">
+
+            <!-- 회원가입 버튼 -->
+            <div class="d-flex justify-content-center mt-3 mb-5">
+                <button type="submit" class="btn btn-dark w-100">회원 가입</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 

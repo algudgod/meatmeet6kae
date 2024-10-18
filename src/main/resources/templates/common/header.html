@@ -2,31 +2,59 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>MeatMeet6kae</title>
-    <style>
-
-
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>육 깨 비</title>
+    <!-- Bootstrap 및 기타 스타일시트 로드 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
+    <link th:href="@{/css/styles.css}" rel="stylesheet" />
 </head>
-
 <body>
+<!-- Navigation Bar 프래그먼트 정의 -->
+<div th:fragment="header">
+    <!-- 네비게이션 바 -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container px-4 px-lg-5">
+            <!-- 브랜드 로고 -->
+            <a class="navbar-brand" th:href="@{/index}">육 깨 비</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-    <div class="header" th:fragment="header">
-        <h1>MeatMeet6kae</h1>
+            <!-- 네비게이션 메뉴 -->
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <!-- 페이지가 일치하면 동적으로 색 변경, 상단 메뉴 -->
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+                    <li class="nav-item">
+                        <a class="nav-link" th:classappend="${page == 'menu'} ? 'active'" th:href="@{/menu}">메뉴</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:classappend="${page == 'board'} ? 'active'" th:href="@{/board}">게시판</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:classappend="${page == 'location'} ? 'active'" th:href="@{/location}">오시는 길</a>
+                    </li>
+                </ul>
 
-        <!-- 로그인 여부에 따른 처리 -->
-        <div th:if="${user != null}">
-            <p class="welcome-message">환영합니다, <span th:text="${user.name}">사용자</span>님!</p>
-            <!-- 현재 URL이 /users/showUserInfo가 아닐 때만 내정보보기 링크를 표시 -->
-            <a th:if="${currentUrl != '/users/showUserInfo'}" href="/users/showUserInfo">내정보보기</a>
-            <a href="/users/logout">로그아웃</a>
+                <!-- 로그인 여부에 따른 처리 -->
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0"> <!-- 우측 정렬 -->
+                    <div class="d-flex align-items-center"> <!-- 추가된 div로 수평 정렬 -->
+                        <div th:if="${user != null}">
+                            <li class="nav-item">
+                                <span class="navbar-text me-3">환영합니다, <span th:text="${user.name}">사용자</span>님!</span>
+                            </li>
+                            <li class="nav-item"><a class="nav-link" th:href="@{/users/showUserInfo}">내 정보 보기</a></li>
+                            <li class="nav-item"><a class="nav-link" th:href="@{/users/logout}">로그아웃</a></li>
+                        </div>
+
+                        <div th:if="${user == null}">
+                            <li class="nav-item"><a class="nav-link me-3" th:href="@{/users/login}">로그인</a></li>
+                          <!--  <li class="nav-item"><a class="nav-link" th:href="@{/users/addUserForm}">회원 가입</a></li> -->
+                        </div>
+                    </div>
+                </ul>
+            </div>
         </div>
-
-        <div th:if="${user == null}">
-            <a href="/users/login">로그인</a>
-            <a href="/users/addUserForm">회원 가입</a>
-        </div>
-    </div>
-
+    </nav>
+</div>
 </body>
 </html>

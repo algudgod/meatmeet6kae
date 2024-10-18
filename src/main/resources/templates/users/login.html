@@ -3,33 +3,61 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>로그인</title>
+
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 
 <body>
-<div class="container">
-    <h1>로그인</h1>
-    <form action="/users/login" method="post">
-        <div>
-            <label for="loginId">Login ID:</label>
-            <input type="text" id="loginId" name="loginId" required maxlength="20">
-        </div>
-        <div>
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required maxlength="100">
-        </div>
-        <div>
-            <button type="submit">로그인</button>
-            <div th:if="${error}" class="error-message" th:text="${error}"></div>
-        </div>
-    </form>
+    <!-- Navigation (공통 헤더) -->
+    <div th:replace="~{common/header :: header}"></div>
 
-    <!-- 아이디 찾기 및 비밀번호 찾기 링크 추가 -->
-    <div>
-        <a href="/users/findUserId">아이디 찾기</a> |
-        <a href="/users/findPasswordForm">비밀번호 찾기</a>
+    <!-- 로그인 -->
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-4">
+                <h1 class="text-center mb-4">로그인</h1>
+
+                <!-- 구분선 추가 -->
+                <div class="d-flex justify-content-center">
+                    <hr style="width: 100%; border: 1px solid #000;">
+                </div>
+
+                <form action="/users/login" method="post">
+                    <div class="mb-3">
+                        <input type="text" id="loginId" name="loginId" class="form-control" required maxlength="20" placeholder="아이디">
+                    </div>
+                    <div class="mb-3">
+                        <input type="password" id="password" name="password" class="form-control" required maxlength="100" placeholder="비밀번호">
+                    </div>
+
+                    <!--로그인 실패시 에러메세지-->
+                    <div th:if="${error}" class="text-danger text-center mt-3" th:text="${error}"></div>
+
+                    <div class="d-flex justify-content-center mt-3" > <!-- 버튼을 중앙에 정렬하기 위한 bootStrap클래스-->
+                        <button type="submit" class="btn btn-dark w-100">로그인</button>
+                    </div>
+                    <!-- 구분선 추가 -->
+                    <div class="d-flex justify-content-center">
+                        <hr style="width: 100%; border: 1px solid #000;">
+                    </div>
+
+                    <div class="d-flex justify-content-center">
+                        <a href="/users/addUserForm" class="btn btn-outline-dark w-100">회원가입</a>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+        <!-- 아이디 찾기 및 비밀번호 찾기 / 회원가입 링크 mb-5 아래와 간격 조절-->
+        <div class="text-center mt-4 mb-5">
+            <a href="/users/findIdForm">아이디 찾기</a> |
+            <a href="/users/findPasswordForm">비밀번호 찾기</a>
+        </div>
+
     </div>
-</div>
-</body>
 
+</body>
 </html>

@@ -27,6 +27,7 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'  // JUnit Test 런처
 	implementation 'org.springframework.boot:spring-boot-starter-mail' //이메일 전송
 	implementation 'org.springframework.boot:spring-boot-starter-validation' //유효성 검증
+	implementation 'org.springframework.boot:spring-boot-starter-security' // Spring Security
 }
 
 tasks.named('test') {

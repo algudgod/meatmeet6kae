@@ -1,6 +1,6 @@
 package com.meatmeet6kae.controller.user;
 
-import com.meatmeet6kae.dto.user.UserDTO;
+import com.meatmeet6kae.dto.user.UserDto;
 import com.meatmeet6kae.entity.user.User;
 import com.meatmeet6kae.service.user.UserService;
 import com.meatmeet6kae.service.verification.EmailVerificationService;
@@ -67,11 +67,11 @@ public class UserController {
 
     // 사용자를 추가하는 메서드 -05리펙토링_0918
     @PostMapping("/addUser")
-    public String addUser(@ModelAttribute @Valid UserDTO userDTO, BindingResult bindingResult, Model model,
+    public String addUser(@ModelAttribute @Valid UserDto userDto, BindingResult bindingResult, Model model,
                           @RequestParam Map<String, String> params) { //html에 있는 우편정보 가져오기 위한 Map_0919
 
         // 데이터 확인을 위해 로그 추가
-        logger.debug("UserDTO: {}", userDTO);
+        logger.debug("UserDTO: {}", userDto);
         logger.debug("Params: {}", params);
 
         if (bindingResult.hasErrors()) {
@@ -82,19 +82,26 @@ public class UserController {
             // 유효성 검사에 실패한 경우, 오류 메시지와 함께 가입 폼으로 다시 이동
             return "users/addUserForm";
         }
+
         try {
             // DTO를 엔티티로 변환
             User newUser = new User();
-            newUser.setLoginId(userDTO.getLoginId());
-            newUser.setPassword(userDTO.getPassword());
-            newUser.setName(userDTO.getName());
-            newUser.setEmail(userDTO.getEmail()); //생성한 이메일 주소를 설정
+            newUser.setLoginId(userDto.getLoginId());
+            newUser.setPassword(userDto.getPassword());
+            newUser.setName(userDto.getName());
+            newUser.setEmail(userDto.getEmail()); //생성한 이메일 주소를 설정
 
             //존재하는 addr을 위해 @RequestParam 하여 값 불러오기
             newUser.setAddr(params.get("addr")); //주소
             String postcode = params.get("postcode"); //우편번호
             String addrDetail = params.get("addrDetail"); //상세주소
             String addrExtraAddress = params.get("addrExtraAddress"); // 참고항목
+
+            String gender = params.get("gender");
+            newUser.setGender(gender);
+
+            String emailYn = params.get("emailYn");
+            newUser.setEmailYn(emailYn);
 
             // 로그로 확인
             logger.debug("Addr: {}", newUser.getAddr());
@@ -144,7 +151,7 @@ public class UserController {
             }
             // 로그인 성공 - 세션에 사용자 정보 저장
             session.setAttribute("user", user);
-            return "redirect:/";  // 로그인 성공 후 홈으로 리다이렉트
+            return "redirect:/index";  // 로그인 성공 후 홈으로 리다이렉트
         } else {
             // 로그인 실패 - 에러 메시지 전달
             model.addAttribute("error", "ID 또는 PASSWORD가 잘못 입력 되었습니다.");

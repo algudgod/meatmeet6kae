@@ -4,7 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public class UserDTO {
+public class UserDto {
 
     @NotBlank(message = "아이디는 필수 항목입니다.")
     @Size(min = 5, max = 20, message = "Login ID는 5자 이상 20자 이하여야 합니다.")

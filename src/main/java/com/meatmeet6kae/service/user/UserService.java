@@ -3,6 +3,7 @@ package com.meatmeet6kae.service.user;
 import com.meatmeet6kae.entity.user.User;
 import com.meatmeet6kae.repository.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -17,10 +18,12 @@ public class UserService {
     // 로그를 남기기 위한 Logger 객체 설정: DEBUG
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     //사용자 조회 메서드
@@ -44,6 +47,11 @@ public class UserService {
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
         }
+
+        // 비밀번호 암호화
+        String encodedPassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(encodedPassword);
+
         return userRepository.save(user);  //Repository를 통해 사용자 저장
     }
 
@@ -58,16 +66,21 @@ public class UserService {
     }
 
     //사용자 로그인 메서드
+    //09리펙토링_0927 비밀번호 비교
     public User login(String loginId, String password) {
         Optional<User> loginUser = getUserByLoginId(loginId);  //
 
         if (loginUser.isPresent()) {
             User user = loginUser.get();
-            if (user.getPassword().equals(password)) {
-                return user;  // 로그인 성공
+            // 사용자가 입력한 평문 비밀번호와 DB에 저장된 암호화된 비밀번호를 비교
+            // password: 사용자가 입력한 평문 비밀번호
+            // user.getPassword(): DB에 저장된 암호화된 비밀번호
+            if (passwordEncoder.matches(password, user.getPassword())) {
+                return user;  // 비밀번호가 일치하면 로그인 성공
             }
         }
-        return null;  // 로그인 실패 시 null 반환
+        // 사용자 조회 실패 또는 비밀번호 불일치 시 null 반환 (로그인 실패)
+        return null;
     }
 
     //사용자 수정 메서드

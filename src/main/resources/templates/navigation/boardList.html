@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>게시판</title>
+    <link rel="stylesheet" href="/css/styles.css"> <!-- 로그인과 동일한 CSS 파일 -->
+</head>
+<body>
+
+<!-- Navigation (공통 헤더) -->
+<div th:replace="~{common/header :: header}"></div>
+
+<!-- 게시판 컨테이너 -->
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <!-- 게시판 제목 -->
+            <h2 class="text-center mb-4">게시판</h2>
+            <!-- 구분선 -->
+            <div class="d-flex justify-content-center">
+                <hr style="width: 100%; border: 1px solid #000;">
+            </div>
+            <!-- 카테고리 탭 -->
+            <nav class="category-tabs d-flex justify-content-center mb-3">
+                <a th:href="@{/boards(boardCode='NOTICE')}" class="tab btn btn-outline-dark me-3" th:classappend="${boardCode == 'NOTICE'} ? 'active'">공지사항</a>
+                <a th:href="@{/boards(boardCode='HOT')}" class="tab btn btn-outline-dark me-3" th:classappend="${boardCode == 'HOT'} ? 'active'">HOT</a>
+                <a th:href="@{/boards(boardCode='FREE')}" class="tab btn btn-outline-dark me-3" th:classappend="${boardCode == 'FREE'} ? 'active'">자유게시판</a>
+            </nav>
+
+            <!-- 구분선 -->
+            <div class="d-flex justify-content-center mb-2">
+                <hr style="width: 100%; border: 1px solid #000; margin: 0;">
+            </div>
+
+            <!-- 게시글 목록 테이블 -->
+            <table class="table table-striped text-center mt-3">
+                <thead>
+                <tr>
+                    <th style="width: 10%;">No</th>
+                    <th style="width: 40%;">제목</th>
+                    <th style="width: 20%;">작성자</th>
+                    <th style="width: 20%;">작성일</th>
+                    <th style="width: 10%;">조회</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="board : ${boards}">
+                    <td th:text="${board.boardNo}">1</td>
+                    <td>
+                        <a th:href="@{/boards/{board.boardNo}}" th:text="${board.title}">제목</a>
+                    </td>
+                    <td th:text="${board.user.loginId}">아이디</td>
+                    <td th:text="${#dates.format(board.createDate, 'yyyy-MM-dd')}">2022-11-05</td>
+                    <td th:text="${board.likes}">0</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <!-- 구분선 -->
+            <div class="d-flex justify-content-center mt-3">
+                <hr style="width: 100%; border: 1px solid #000;">
+            </div>
+
+            <!-- 글쓰기 버튼 -->
+            <div class="d-flex justify-content-end mt-3">
+
+                <a th:if="${user != null}"
+                        th:href="@{/boards/addBoardForm(boardCode=${boardCode})}" class="btn btn-dark" style="width: 100px;">글쓰기</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>글쓰기</title>
+
+    <link rel="stylesheet" href="/css/styles.css"> <!-- 기존 스타일 CSS 파일 -->
+</head>
+
+<body>
+<!-- Navigation (공통 헤더) -->
+<div th:replace="~{common/header :: header}"></div>
+
+<!-- 글쓰기 폼 -->
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-6">
+            <!--현재 게시판 보여주기-->
+            <span th:switch="${boardDto.boardCode}">
+                <span th:case="'FREE'">자유게시판</span>
+                <span th:case="'NOTICE'">공지사항</span>
+            </span>
+
+            <!-- 구분선 추가 -->
+            <div class="d-flex justify-content-center">
+                <hr style="width: 100%; border: 1px solid #000;">
+            </div>
+
+            <form th:action="@{/boards/addBoard}" th:object="${boardDto}" method="post">
+                <input type="hidden" th:field="*{boardCode}"/>
+
+                <!-- 제목 입력 필드 -->
+                <div class="mb-3">
+                    <input type="text" id="title" th:field="*{title}" class="form-control" required maxlength="100" placeholder="제목을 입력하세요">
+                </div>
+
+                <!-- 내용 입력 필드 -->
+                <div class="mb-3">
+                    <textarea id="content" th:field="*{content}" class="form-control" required rows="10" placeholder="내용을 입력하세요"></textarea>
+                </div>
+
+                <!-- 제출 버튼 -->
+                <div class="d-flex justify-content-center mt-3">
+                    <button type="submit" class="btn btn-dark">등록하기</button>
+                    <a th:href="@{/boardList}" class="btn btn-outline-dark ms-3">취소</a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

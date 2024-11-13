@@ -142,6 +142,7 @@ public class UserController {
                          HttpSession session, Model model) {
 
         User user = userService.login(loginId, password);  // UserService의 login 메서드 호출
+
         if (user != null) {
             // loginId 사용여부를 확인
             if("N".equals(user.getUseYn())) {
@@ -151,7 +152,7 @@ public class UserController {
             }
             // 로그인 성공 - 세션에 사용자 정보 저장
             session.setAttribute("user", user);
-            return "redirect:/index";  // 로그인 성공 후 홈으로 리다이렉트
+            return "redirect:/";  // 로그인 성공 후 홈으로 리다이렉트
         } else {
             // 로그인 실패 - 에러 메시지 전달
             model.addAttribute("error", "ID 또는 PASSWORD가 잘못 입력 되었습니다.");

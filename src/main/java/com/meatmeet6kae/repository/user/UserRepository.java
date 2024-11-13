@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, String> { // JPA상속, <엔티티클래스와 기본키의 데이터 타입>
+public interface UserRepository extends JpaRepository<User, String> { // JPA상속, <엔티티클래스, 기본키의 데이터 타입>
 
     // 사용자 조회:
     // login_id로 조회, 사용자가 없을 경우를 위해 Optional<T>로 안전하게 null 처리

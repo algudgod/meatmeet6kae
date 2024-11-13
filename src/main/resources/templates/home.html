@@ -1,39 +1,50 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>Shop Item - Start Bootstrap Template</title>
+        <!-- Favicon-->
+        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+        <!-- Bootstrap icon을 추가할 수 있는 코드 최신버전_10.0 -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet" />
 
-<head>
-    <meta charset="UTF-8">
-    <title>MeatMeet6kae</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="css/styles.css" rel="stylesheet" />
+    </head>
 
-    <style>
-
-    </style>
-</head>
-
-<body>
-
-<div class="container">
-
-    <!-- 헤더 -->
+    <body>
     <div th:replace="~{common/header :: header}"></div>
 
-    <!-- 메인 컨텐츠 -->
-    <div>
+        <!-- Product section-->
+        <section class="py-5">
+            <div class="container px-4 px-lg-5 my-5">
+                <div class="row gx-4 gx-lg-5 align-items-center">
+                    <div class="col-md-6"><img class="card-img-top mb-5 mb-md-0" src="/images/main6kaepic.jpg" alt="..." /></div>
+                    <div class="col-md-6">
+                        <!--글씨크기 fs-1 큰, fs-3 중간 fs-5 작은 -->
+                        <div class="fs-3 small mb-2">
+                            <i class="bi bi-balloon-heart-fill"></i> 육깨비 소식
+                        </div>
+                        <!-- <h1 class="display-5 fw-bolder">육깨비</h1> -->
+                        <div class="fs-5 mb-5">
+                            <span class="text-decoration-line-through">$45.00</span>
+                            <span>$40.00</span>
+                        </div>
+                        <p class="lead">Lorem ipsum dolor sit amet consectetur adipisicing elit. Praesentium at dolorem quidem modi. Nam sequi consequatur obcaecati excepturi alias magni, accusamus eius blanditiis delectus ipsam minima ea iste laborum vero?</p>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-        <p>
-         <h1>content</h1>
-        <p>
-            <img th:src="@{/images/main6kaepic.jpg}" alt="이미지가 로드 실패." width="300" height="auto" />
-        </p>
-        </p>
+        <!-- Footer-->
+        <div th:replace="~{common/footer :: footer}"></div>
 
-    </div>
-
-    <!-- 푸터 -->
-    <div th:replace="~{common/footer :: footer}"></div>
-</div>
-<!-- /container -->
-
-</body>
+        <!-- Bootstrap core JS-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Core theme JS-->
+        <script src="js/scripts.js"></script>
+    </body>
 </html>

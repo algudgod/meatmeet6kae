@@ -89,6 +89,7 @@ public class UserController {
             newUser.setLoginId(userDto.getLoginId());
             newUser.setPassword(userDto.getPassword());
             newUser.setName(userDto.getName());
+            newUser.setNickname((userDto.getNickname()));
             newUser.setEmail(userDto.getEmail()); //생성한 이메일 주소를 설정
 
             //존재하는 addr을 위해 @RequestParam 하여 값 불러오기
@@ -122,6 +123,7 @@ public class UserController {
 
 
             return "users/addUser"; // 회원가입 완료 페이지로 이동
+
         } catch (IllegalArgumentException e) {
             // 이메일 중복 등으로 인해 오류 발생 시
             model.addAttribute("error", e.getMessage()); // 에러 메시지를 모델에 추가
@@ -268,10 +270,20 @@ public class UserController {
         return userService.existsByLoginId(loginId);
     }
 
+    // Nickname 중복 확인
+    @GetMapping("/checkNickname")
+    @ResponseBody
+    public boolean checkNickname(@RequestParam("nickname")String nickname){
+        return userService.isNicknameAvailable(nickname);
+    }
+
+
     //ID찾기 폼을 보여주는 메서드
     @GetMapping("/findUserIdForm")
     public String findUserIdForm() {
         return "users/findUserId";
     }
+
+
 
 }

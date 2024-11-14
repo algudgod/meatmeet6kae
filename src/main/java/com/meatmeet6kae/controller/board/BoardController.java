@@ -35,15 +35,15 @@ public class BoardController {
 
     // 게시판 글쓰기 form을 보여주는 메서드
     @GetMapping("/addBoardForm")
-    public String addBoardForm(@RequestParam("boardCode")String boardCode, Model model) {
+    public String addBoardForm(@RequestParam("boardCategory")String boardCategory, Model model) {
         BoardDto boardDto = new BoardDto();
-        boardDto.setBoardCode(boardCode);
+        boardDto.setBoardCategory(boardCategory);
         model.addAttribute("boardDto",boardDto);
         return "boards/addBoardForm";
     }
 
     @GetMapping("")
-    public String getBoardList(@RequestParam("boardCode")String boardCode, HttpSession session, Model model){
+    public String getBoardList(@RequestParam("boardCategory")String boardCategory, HttpSession session, Model model){
 
         //세션에서 로그인 된 사용자의 정보를 가져옴(header의 동적 로그인/로그아웃)
         User user = (User)session.getAttribute("user");
@@ -55,10 +55,10 @@ public class BoardController {
         }
         model.addAttribute("user", user);
 
-        logger.debug("boardCode: {}", boardCode);
-        List<Board> boards = boardService.getBoardsByCode(boardCode);
+        logger.debug("boardCategory: {}", boardCategory);
+        List<Board> boards = boardService.getBoardsByCategory(boardCategory);
         model.addAttribute("boards", boards);
-        model.addAttribute(("boardCode"), boardCode);
+        model.addAttribute(("boardCategory"), boardCategory);
         return "navigation/boardList";
     }
 
@@ -73,8 +73,7 @@ public class BoardController {
         }
 
         logger.debug("boardDto: {}", boardDto);
-        logger.debug("Board Code from BoardDto: {}", boardDto.getBoardCode());
-        logger.debug(": {}", boardDto);
+        logger.debug("boardCategory from BoardDto: {}", boardDto.getBoardCategory());
 
         if(result.hasErrors()) {
             logger.debug("result error: {}", result.getAllErrors());
@@ -82,7 +81,7 @@ public class BoardController {
             return "boards/addBoardForm";
         }
         // 입력된 데이터에 오류가 없을 시 입력된 정보를 저장 -> service
-        boardService.addBoard(boardDto);
+        boardService.addBoard(boardDto, user);
         return "navigation/boardList";
     }
 

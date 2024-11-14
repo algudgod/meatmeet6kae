@@ -14,6 +14,7 @@ public class User {
     private String useYn;
     private String password;
     private String name;
+    private String nickname;
     @Column(name = "role", nullable = false, insertable = false) //INSERT할 때 포함하지 않는다. default=USER
     private String role;
     private String gender;
@@ -27,6 +28,7 @@ public class User {
 
 
     // Getters and Setters
+
     public String getLoginId() {
         return loginId;
     }
@@ -57,6 +59,14 @@ public class User {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
     }
 
     public String getRole() {

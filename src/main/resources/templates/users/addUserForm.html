@@ -33,6 +33,7 @@
                 <div id="loginIdCheckResult" class="text-danger mt-2"></div> <!-- 아이디 중복 확인 내용 출력 -->
             </div>
 
+
             <div class="mb-3">
                 <input type="password" id="password" name="password" class="form-control" required maxlength="100" placeholder="비밀번호를 입력하세요">
             </div>
@@ -59,6 +60,14 @@
                         <label class="form-check-label" for="gender_female">여</label>
                     </div>
                 </div>
+            </div>
+
+            <div class="mb-3">
+                <div class="input-group">
+                    <input type="text" id="nickname" name="nickname" class="form-control" required maxlength="20" placeholder="닉네임을 입력하세요">
+                    <button type="button" class="btn btn-outline-dark" onclick="checkNickname()">중복 확인</button>
+                </div>
+                <div id="nicknameCheckResult" class="text-danger mt-2"></div> <!-- 닉네임 중복 확인 결과 출력 -->
             </div>
 
             <div class="mb-3">
@@ -149,11 +158,14 @@
     var isLoginIdChecked = false;
     var isEmailVerified = false;
 
+    // 닉네임 중복 확인
+    var isNicknameChecked = false;
+
     // loginId를 확인하기 위한 함수
     function checkLoginId() {
         const loginId = document.getElementById('loginId').value;
 
-        // 자바스크립트에서 먼저 길이 검사를 수행 -06리펙토링_0918
+        // 자바스크립트에서 loginId 길이 검사 -06리펙토링_0918
         if (loginId.length < 5 || loginId.length > 20) {
             alert("아이디는 5자 이상 20자 이하여야 합니다.");
             return;
@@ -175,6 +187,40 @@
                 }
             })
             .catch(error => console.error('Error:', error));
+    }
+
+    // 닉네임 중복을 확인하기 위한 함수
+    function checkNickname() {
+        const nickname = document.getElementById('nickname').value;
+        const resultElement = document.getElementById('nicknameCheckResult');
+
+        // 닉네임 길이 검사
+        if (nickname.length < 3 || nickname.length > 15) {
+            alert("닉네임은 3자 이상 15자 이하여야 합니다.");
+            return;
+        }
+
+        if (!nickname) {
+            alert("닉네임을 입력하세요.");
+            return;
+        }
+
+        // 서버로 닉네임 중복 확인 요청
+        fetch(`/users/checkNickname?nickname=${encodeURIComponent(nickname)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data) {
+                    resultElement.innerText = "사용 가능한 닉네임입니다.";
+                    isNicknameChecked = true; // 사용 가능한 닉네임으로 확인되면 true
+                } else {
+                    resultElement.innerText = "이미 사용 중인 닉네임입니다.";
+                    isNicknameChecked = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resultElement.innerText = "서버 오류가 발생했습니다.";
+            });
     }
 
     //password를 확인하기 위한 함수
@@ -201,6 +247,7 @@
         passwordCheckResult.innerText = "비밀번호가 일치합니다.";
         return true;
     }
+
 
     // 이메일을 합쳐주는 함수 -07리펙토링_0919
     function getFullEmail() {

@@ -2,6 +2,7 @@ package com.meatmeet6kae.entity.board;
 
 import com.meatmeet6kae.entity.user.User;
 import jakarta.persistence.*;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 
@@ -12,15 +13,19 @@ public class Board {
     @GeneratedValue(strategy = GenerationType.IDENTITY) // PK & 자동 증가
     @Column(name = "board_no")
     private int boardNo;
-    @Column(name = "board_code", length = 10, nullable = false)
-    private String boardCode;
+    @Column(name = "board_category", length = 10, nullable = false)
+    private String boardCategory;
+    @Column(name= "board_tag", length = 10)
+    private String boardTag;
     @Column(name = "title", length = 100, nullable = false)
     private String title;
     @Lob // 대용량 데이터 저장
     @Column(name = "content", nullable = false)
     private String content;
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
     @Column(name = "create_date", updatable = false, insertable = false, columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createDate;
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
     @Column(name = "update_date")
     private LocalDateTime updateDate;
     @ManyToOne
@@ -30,6 +35,7 @@ public class Board {
     private int viewCount;
 
     // Getters and Setters
+
     public int getBoardNo() {
         return boardNo;
     }
@@ -38,12 +44,20 @@ public class Board {
         this.boardNo = boardNo;
     }
 
-    public String getBoardCode() {
-        return boardCode;
+    public String getBoardCategory() {
+        return boardCategory;
     }
 
-    public void setBoardCode(String boardCode) {
-        this.boardCode = boardCode;
+    public void setBoardCategory(String boardCategory) {
+        this.boardCategory = boardCategory;
+    }
+
+    public String getBoardTag() {
+        return boardTag;
+    }
+
+    public void setBoardTag(String boardTag) {
+        this.boardTag = boardTag;
     }
 
     public String getTitle() {

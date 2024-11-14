@@ -23,9 +23,9 @@
             </div>
             <!-- 카테고리 탭 -->
             <nav class="category-tabs d-flex justify-content-center mb-3">
-                <a th:href="@{/boards(boardCode='NOTICE')}" class="tab btn btn-outline-dark me-3" th:classappend="${boardCode == 'NOTICE'} ? 'active'">공지사항</a>
-                <a th:href="@{/boards(boardCode='HOT')}" class="tab btn btn-outline-dark me-3" th:classappend="${boardCode == 'HOT'} ? 'active'">HOT</a>
-                <a th:href="@{/boards(boardCode='FREE')}" class="tab btn btn-outline-dark me-3" th:classappend="${boardCode == 'FREE'} ? 'active'">자유게시판</a>
+                <a th:href="@{/boards(boardCategory='NOTICE')}" class="tab btn btn-outline-dark me-3" th:classappend="${boardCategory == 'NOTICE'} ? 'active'">공지사항</a>
+                <a th:href="@{/boards(boardCategory='HOT')}" class="tab btn btn-outline-dark me-3" th:classappend="${boardCategory == 'HOT'} ? 'active'">HOT</a>
+                <a th:href="@{/boards(boardCategory='FREE')}" class="tab btn btn-outline-dark me-3" th:classappend="${boardCategory == 'FREE'} ? 'active'">자유게시판</a>
             </nav>
 
             <!-- 구분선 -->
@@ -34,12 +34,12 @@
             </div>
 
             <!-- 게시글 목록 테이블 -->
-            <table class="table table-striped text-center mt-3">
+            <table class="table table-striped text-center mt-1">
                 <thead>
                 <tr>
-                    <th style="width: 10%;">No</th>
+                    <th style="width: 5%;">No</th>
                     <th style="width: 40%;">제목</th>
-                    <th style="width: 20%;">작성자</th>
+                    <th style="width: 25%;">작성자</th>
                     <th style="width: 20%;">작성일</th>
                     <th style="width: 10%;">조회</th>
                 </tr>
@@ -51,8 +51,8 @@
                         <a th:href="@{/boards/{board.boardNo}}" th:text="${board.title}">제목</a>
                     </td>
                     <td th:text="${board.user.loginId}">아이디</td>
-                    <td th:text="${#dates.format(board.createDate, 'yyyy-MM-dd')}">2022-11-05</td>
-                    <td th:text="${board.likes}">0</td>
+                    <td th:text="${#temporals.format(board.createDate, 'yyyy-MM-dd')}"></td>
+                    <td th:text="${board.viewCount}">0</td>
                 </tr>
                 </tbody>
             </table>
@@ -66,7 +66,7 @@
             <div class="d-flex justify-content-end mt-3">
 
                 <a th:if="${user != null}"
-                        th:href="@{/boards/addBoardForm(boardCode=${boardCode})}" class="btn btn-dark" style="width: 100px;">글쓰기</a>
+                        th:href="@{/boards/addBoardForm(boardCategory=${boardCategory})}" class="btn btn-dark" style="width: 100px;">글쓰기</a>
             </div>
         </div>
     </div>

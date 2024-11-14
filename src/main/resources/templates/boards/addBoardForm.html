@@ -18,7 +18,7 @@
     <div class="row justify-content-center">
         <div class="col-md-6 col-lg-6">
             <!--현재 게시판 보여주기-->
-            <span th:switch="${boardDto.boardCode}">
+            <span th:switch="${boardDto.boardCategory}">
                 <span th:case="'FREE'">자유게시판</span>
                 <span th:case="'NOTICE'">공지사항</span>
             </span>
@@ -29,7 +29,7 @@
             </div>
 
             <form th:action="@{/boards/addBoard}" th:object="${boardDto}" method="post">
-                <input type="hidden" th:field="*{boardCode}"/>
+                <input type="hidden" th:field="*{boardCategory}"/>
 
                 <!-- 제목 입력 필드 -->
                 <div class="mb-3">

@@ -1,5 +1,6 @@
 package com.meatmeet6kae.service.user;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.meatmeet6kae.entity.user.User;
 import com.meatmeet6kae.repository.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,10 @@ public class UserService {
         //새로운 사용자를 추가하기 전에 이메일 중복을 확인 -01리펙토링_0917
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+        }
+
+        if (!isNicknameAvailable(user.getNickname())) {
+            throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
         }
 
         // 비밀번호 암호화
@@ -101,6 +106,11 @@ public class UserService {
             user.setWithdrawDate(LocalDateTime.now());
             userRepository.save(user);
         }
+    }
+
+    public boolean  isNicknameAvailable(String nickname) {
+        return userRepository.findByNickname(nickname).isEmpty();
+
     }
 }
 

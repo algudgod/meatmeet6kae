@@ -17,9 +17,14 @@ public class UserDto {
     @NotBlank(message = "이름은 필수 항목입니다.")
     private String name;
 
+    @NotBlank(message = "닉네임은 필수 항목입니다.")
+    private String nickname;
+
     @NotBlank(message = "이메일은 필수 항목입니다.")
     @Email(message = "유효한 이메일 주소를 입력하세요.")
     private String email;
+
+
 
     // Getters and Setters
     public String getLoginId() {
@@ -44,6 +49,14 @@ public class UserDto {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
     }
 
     public String getEmail() {

@@ -1,18 +1,29 @@
 package com.meatmeet6kae.controller.home;
 
+import com.meatmeet6kae.entity.board.Board;
 import com.meatmeet6kae.entity.user.User;
+import com.meatmeet6kae.service.board.BoardService;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 @Controller
 public class HomeController {
 
     // 디버깅
     private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
+
+    public final BoardService boardService;
+
+    public HomeController(BoardService boardService) {
+        this.boardService = boardService;
+    }
 
 
     @GetMapping("/")
@@ -57,7 +68,18 @@ public class HomeController {
     }
 
     @GetMapping("/boardList")
-    public String boardMain(Model model){
+    public String boardList(@RequestParam(value = "boardCategory", required = false)String boardCategory, Model model){
+
+        List<Board> boards;
+        // boardCode가 없으면 FREE로 설정.
+        if (boardCategory == null || boardCategory.isEmpty()) {
+            boards = boardService.getBoardsByCategory("FREE");
+        } else {
+            boards = boardService.getBoardsByCategory(boardCategory);
+        }
+
+        model.addAttribute("boards", boards);
+        model.addAttribute("boardCategory", boardCategory);
         model.addAttribute("page","boardList");
         return "navigation/boardList";
     }

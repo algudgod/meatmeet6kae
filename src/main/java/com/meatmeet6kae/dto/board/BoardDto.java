@@ -14,15 +14,7 @@ public class BoardDto {
     private String content;
 
     @NotBlank
-    private String boardCode;
-
-    public String getBoardCode() {
-        return boardCode;
-    }
-
-    public void setBoardCode(String boardCode) {
-        this.boardCode = boardCode;
-    }
+    private String boardCategory;
 
     public String getTitle() {
         return title;
@@ -38,5 +30,13 @@ public class BoardDto {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String getBoardCategory() {
+        return boardCategory;
+    }
+
+    public void setBoardCategory(String boardCategory) {
+        this.boardCategory = boardCategory;
     }
 }

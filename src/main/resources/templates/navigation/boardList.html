@@ -15,18 +15,23 @@
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-10">
-            <!-- 게시판 제목 -->
-            <h2 class="text-center mb-4">게시판</h2>
+            <!-- 카테고리 탭 -->
+            <nav class="category-tabs d-flex justify-content-center mb-3">
+                <a th:href="@{/boardList(boardCategory='NOTICE')}" class="tab btn btn-outline-dark me-3" th:classappend="${boardCategory == 'NOTICE'} ? 'active'">공지사항</a>
+                <a th:href="@{/boardList(boardCategory='HOT')}" class="tab btn btn-outline-dark me-3" th:classappend="${boardCategory == 'HOT'} ? 'active'">HOT</a>
+                <a th:href="@{/boardList(boardCategory='FREE')}" class="tab btn btn-outline-dark me-3" th:classappend="${boardCategory == 'FREE'} ? 'active'">자유게시판</a>
+            </nav>
             <!-- 구분선 -->
             <div class="d-flex justify-content-center">
                 <hr style="width: 100%; border: 1px solid #000;">
             </div>
-            <!-- 카테고리 탭 -->
-            <nav class="category-tabs d-flex justify-content-center mb-3">
-                <a th:href="@{/boards(boardCategory='NOTICE')}" class="tab btn btn-outline-dark me-3" th:classappend="${boardCategory == 'NOTICE'} ? 'active'">공지사항</a>
-                <a th:href="@{/boards(boardCategory='HOT')}" class="tab btn btn-outline-dark me-3" th:classappend="${boardCategory == 'HOT'} ? 'active'">HOT</a>
-                <a th:href="@{/boards(boardCategory='FREE')}" class="tab btn btn-outline-dark me-3" th:classappend="${boardCategory == 'FREE'} ? 'active'">자유게시판</a>
-            </nav>
+
+            <!-- 게시판 제목 -->
+            <h2 class="board-title" style="font-size: 20px;" th:text="${boardCategory == 'NOTICE' ? '공지사항'
+                : (boardCategory == 'HOT' ? 'HOT 게시판'
+                : (boardCategory == 'FREE' ? '자유게시판' : '게시판'))}">
+            </h2>
+            <p class="board-description" style="font-size: 15px;">육회를 좋아하는 사람들끼리 자유롭게 소통하는 곳입니다.</p>
 
             <!-- 구분선 -->
             <div class="d-flex justify-content-center mb-2">
@@ -37,20 +42,20 @@
             <table class="table table-striped text-center mt-1">
                 <thead>
                 <tr>
-                    <th style="width: 5%;">No</th>
-                    <th style="width: 40%;">제목</th>
-                    <th style="width: 25%;">작성자</th>
-                    <th style="width: 20%;">작성일</th>
-                    <th style="width: 10%;">조회</th>
+                    <th style="width: 50px; font-weight: normal;"></th>
+                    <th style="width: 400px; font-weight: normal;">제목</th>
+                    <th style="width: 200px; font-weight: normal;">작성자</th>
+                    <th style="width: 150px; font-weight: normal;">작성일</th>
+                    <th style="width: 100px; font-weight: normal;">조회</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:each="board : ${boards}">
                     <td th:text="${board.boardNo}">1</td>
-                    <td>
-                        <a th:href="@{/boards/{board.boardNo}}" th:text="${board.title}">제목</a>
+                    <td class="text-start">
+                        <a th:href="@{/boards/{board.boardNo}(boardNo=${board.boardNo})}" th:text="${board.title}">제목</a>
                     </td>
-                    <td th:text="${board.user.loginId}">아이디</td>
+                    <td th:text="${board.user.nickname}">닉네임</td>
                     <td th:text="${#temporals.format(board.createDate, 'yyyy-MM-dd')}"></td>
                     <td th:text="${board.viewCount}">0</td>
                 </tr>

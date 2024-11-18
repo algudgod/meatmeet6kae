@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>게시글 상세보기</title>
+    <link rel="stylesheet" href="/css/styles.css"> <!-- 기존 스타일 적용 -->
+</head>
+<body>
+
+<!-- 공통 헤더 -->
+<div th:replace="~{common/header :: header}"></div>
+
+<!-- 게시글 상세보기 컨테이너 -->
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+
+            <!-- 목록, 수정, 삭제 버튼 -->
+            <div class="d-flex justify-content-between align-items-center mt-3 mb-4">
+                <!-- 목록(왼쪽 정렬) -->
+                <a th:href="@{/boardList}" class="btn btn-sm btn-outline-secondary" style="font-size: 14px;">목록</a>
+                <!-- 수정 및 삭제 버튼(오른쪽 정렬) -->
+                <div class="d-flex align-items-center">
+                    <!-- 수정  -->
+                    <a th:if="${user != null and user.loginId == board.user.loginId}"
+                       th:href="@{/boards/editBoard/{boardNo}(boardNo=${board.boardNo})}"
+                       class="btn btn-sm btn-outline-secondary" style="font-size: 14px; margin-right: 5px;">수정</a>
+
+                    <!-- 삭제: POST방식을 위해 a 태그에서 독립적인 form으로 변경 -->
+                    <form th:if="${user != null and user.loginId == board.user.loginId}"
+                          th:action="@{/boards/deleteBoard/{boardNo}(boardNo=${board.boardNo})}"
+                          method="post"
+                          onsubmit="return confirm('정말 삭제하시겠습니까?');"
+                          style="display: inline;">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" style="font-size: 14px;">삭제</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 구분선 -->
+            <hr style="border: 1px solid #888;">
+
+            <!-- 게시판 제목 -->
+            <h2 class="board-title" style="font-size: 15px;" th:text="${boardCategory == 'NOTICE' ? '공지사항'
+                : (boardCategory == 'HOT' ? 'HOT 게시판'
+                : (boardCategory == 'FREE' ? '자유게시판' : '게시판'))}">
+            </h2>
+
+            <!-- 게시글 제목 -->
+            <h2 class="board-title" th:text="${board.title}"></h2>
+
+            <!-- 작성자 및 작성일 -->
+            <div class="text-muted mt-3 mb-4">
+                <span th:text="${board.user.nickname}"></span>
+                <span th:text="'조회 ' + ${board.viewCount}" style="margin-left: 10px;"></span>
+                <span th:text="${#temporals.format(board.createDate, 'yyyy-MM-dd HH:mm')}" style="margin-left: 10px;"></span>
+            </div>
+
+            <!-- 구분선 -->
+            <hr style="border: 1px solid #888;">
+
+            <!-- 게시글 내용 -->
+            <div class="board-content mt-4 mb-4" style="white-space: pre-line;">
+                <p th:text="${board.content}"></p>
+            </div>
+
+            <!-- 구분선 -->
+            <hr style="border: 1px solid #888;">
+
+            <!-- 목록, 수정, 삭제 버튼 -->
+            <div class="d-flex justify-content-between align-items-center mt-3 mb-4">
+                <!-- 목록(왼쪽 정렬) -->
+                <a th:href="@{/boardList}" class="btn btn-sm btn-outline-secondary" style="font-size: 14px;">목록</a>
+                <!-- 수정 및 삭제 버튼(오른쪽 정렬) -->
+                <div class="d-flex align-items-center">
+                    <!-- 수정  -->
+                    <a th:if="${user != null and user.loginId == board.user.loginId}"
+                       th:href="@{/boards/editBoard/{boardNo}(boardNo=${board.boardNo})}"
+                       class="btn btn-sm btn-outline-secondary" style="font-size: 14px; margin-right: 5px;">수정</a>
+
+                    <!-- 삭제: POST방식을 위해 a 태그에서 독립적인 form으로 변경 -->
+                    <form th:if="${user != null and user.loginId == board.user.loginId}"
+                          th:action="@{/boards/deleteBoard/{boardNo}(boardNo=${board.boardNo})}"
+                          method="post"
+                          onsubmit="return confirm('정말 삭제하시겠습니까?');"
+                          style="display: inline;">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" style="font-size: 14px;">삭제</button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- 공통 푸터 -->
+<div th:replace="~{common/footer :: footer}"></div>
+
+</body>
+</html>

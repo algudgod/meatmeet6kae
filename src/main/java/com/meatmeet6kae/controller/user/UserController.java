@@ -243,7 +243,7 @@ public class UserController {
         return "redirect:/users/showUserInfo";
     }
 
-    //아이디 사용여부 변경
+    //아이디 사용여부 변경 (탈퇴)
     @PostMapping("/deactivate")
     public String deactivateUser(HttpSession session) {
         User currentUser = (User) session.getAttribute("user");

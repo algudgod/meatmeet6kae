@@ -8,7 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class BoardService {
@@ -28,7 +30,6 @@ public class BoardService {
     }
 
     public List<Board>getBoardsByCategory(String boardCategory){
-
         return boardRepository.findByBoardCategory(boardCategory);
     }
 
@@ -44,4 +45,21 @@ public class BoardService {
         boardRepository.save(board);
     }
 
+    public Board getBoardByBoardNo(int boardNo) {
+        return boardRepository.findByBoardNo(boardNo).orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+    }
+
+    public Board updateBoard(Board board) {
+
+        Board boards = getBoardByBoardNo(board.getBoardNo());
+        boards.setTitle(board.getTitle());
+        boards.setContent(board.getContent());
+        boards.setUpdateDate(LocalDateTime.now());
+        return boardRepository.save(boards);
+    }
+
+    public void deleteBoard(int boardNo){
+        Board board = getBoardByBoardNo(boardNo);
+        boardRepository.delete(board);
+    }
 }

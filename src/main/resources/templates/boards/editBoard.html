@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>게시글 수정</title>
+    <link rel="stylesheet" href="/css/styles.css"> <!-- 기존 스타일 적용 -->
+</head>
+<body>
+
+<!-- 공통 헤더 -->
+<div th:replace="~{common/header :: header}"></div>
+
+<!-- 게시글 수정 컨테이너 -->
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h2 class="text-center mb-4">게시글 수정</h2>
+
+            <!-- 게시글 수정 폼 -->
+            <form th:action="@{/boards/updateBoard}" th:object="${boards}" method="post">
+                <input type="hidden" th:field="*{boardNo}" />
+
+                <!-- 제목 입력 -->
+                <div class="mb-3">
+                    <label for="title" class="form-label">제목</label>
+                    <input type="text" id="title" th:field="*{title}" class="form-control" required />
+                </div>
+
+                <!-- 내용 입력 -->
+                <div class="mb-3">
+                    <label for="content" class="form-label">내용</label>
+                    <textarea id="content" th:field="*{content}" class="form-control" rows="10" required></textarea>
+                </div>
+
+                <!-- 버튼 그룹 -->
+                <div class="d-flex justify-content-between mt-4">
+                    <a th:href="@{/boardList}" class="btn btn-sm btn-outline-secondary"style="font-size: 14px;">취소</a>
+                    <button type="submit" class="btn btn-sm btn-outline-secondary"style="font-size: 14px;">등록</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 공통 푸터 -->
+<div th:replace="~{common/footer :: footer}"></div>
+
+</body>
+</html>

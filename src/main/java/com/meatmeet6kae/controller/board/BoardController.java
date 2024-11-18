@@ -9,13 +9,11 @@ import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -63,26 +61,113 @@ public class BoardController {
     }
 
     @PostMapping("addBoard")
-    public String addBoard(BoardDto boardDto, BindingResult result, HttpSession session, Model model){
+    public String addBoard(BoardDto boardDto, BindingResult result, HttpSession session, Model model) {
 
-        //1.세션에서 로그인 된 사용자의 정보를 가져옴
-        User user = (User)session.getAttribute("user");
-        //2. 로그인을 하지 않은 사용자에 대한 글쓰기 제한
-        if (user == null) {
-            return "redirect:/users/login"; // 로그인 페이지로 리다이렉트
-        }
+        // 1. 세션에서 로그인 된 사용자의 정보를 가져옴
+        User user = (User) session.getAttribute("user");
 
         logger.debug("boardDto: {}", boardDto);
         logger.debug("boardCategory from BoardDto: {}", boardDto.getBoardCategory());
 
-        if(result.hasErrors()) {
+        // 2. 입력된 데이터에 오류가 있는지 검증
+        if (result.hasErrors()) {
             logger.debug("result error: {}", result.getAllErrors());
-            model.addAttribute("error","입력한 정보에 오류가 있습니다.");
+            model.addAttribute("error", "입력한 정보에 오류가 있습니다.");
             return "boards/addBoardForm";
         }
-        // 입력된 데이터에 오류가 없을 시 입력된 정보를 저장 -> service
+
+        // 3. boardCategory가 없으면 "FREE"로 설정
+        if (boardDto.getBoardCategory() == null || boardDto.getBoardCategory().isEmpty()) {
+            boardDto.setBoardCategory("FREE");
+        }
+
+        // 4. Service 레이어를 통해 게시글 저장
         boardService.addBoard(boardDto, user);
-        return "navigation/boardList";
+
+        // 5. 게시글 등록 후 해당 카테고리로 리다이렉트
+        return "redirect:/boardList?boardCategory=" + boardDto.getBoardCategory();
+    }
+
+    //게시글 상세 조회
+    @GetMapping("{boardNo}")
+    public String getBoardDetail(@PathVariable int boardNo, HttpSession session, Model model){
+
+        User user = (User)session.getAttribute("user");
+        model.addAttribute("user",user);
+
+        Board board = boardService.getBoardByBoardNo(boardNo);
+        model.addAttribute("board",board);
+
+        // boardCategory 가져오기gb
+        String boardCategory = board.getBoardCategory();
+        // boardCategory가 없으면 "FREE"로 설정
+        if (boardCategory == null || boardCategory.isEmpty()) {
+            boardCategory = "FREE";
+        }
+        model.addAttribute("boardCategory", boardCategory);
+
+        return "boards/boardDetail";
+    }
+
+    //게시글 수정 폼을 보여주는 메서드
+    @GetMapping("editBoard/{boardNo}")
+    public String editBoard(@PathVariable int boardNo, HttpSession session, Model model){
+
+        User user = (User)session.getAttribute("user");
+        model.addAttribute("user",user);
+
+        // 예외: 사용자가 로그인 되지 않은 경우
+        if (user == null) {
+            return "redirect:/users/login";
+        }
+
+        Board boards = boardService.getBoardByBoardNo(boardNo);
+        model.addAttribute("boards",boards);
+
+        return "boards/editBoard";
+    }
+
+    //게시글 수정 메서드
+    @PostMapping("updateBoard")
+    public String updateBoard(@ModelAttribute Board board, HttpSession session){
+
+        User user = (User)session.getAttribute("user");
+
+        // 예외: 사용자가 로그인 되지 않은 경우
+        if (user == null) {
+            return "redirect:/users/login";
+        }
+
+/*        Board boards = boardService.getBoardByBoardNo(board.getBoardNo());
+        if(!user.getLoginId().equals(board.getUser().getLoginId())){
+            return "redirect:/navigation/boardList";
+        }*/
+
+        boardService.updateBoard(board);
+
+        // 수정 완료 후 , 게시글 상세조회 메서드 호출, boardNo으로 바인딩
+        return "redirect:/boards/"+board.getBoardNo();
+    }
+
+    //게시글 삭제 메서드
+    @PostMapping("/deleteBoard/{boardNo}")
+    public String deleteBoard(@PathVariable int boardNo, HttpSession session){
+
+        User user = (User)session.getAttribute("user");
+
+        // 예외: 사용자가 로그인 되지 않은 경우
+        if (user == null) {
+            return "redirect:/users/login";
+        }
+
+/*        Board board = boardService.getBoardByBoardNo(boardNo);
+        if(!user.getLoginId().equals(board.getUser().getLoginId())){
+            return "redirect:/navigation/boardList";
+        }*/
+
+        boardService.deleteBoard(boardNo);
+
+        return "redirect:/boardList";
     }
 
 }

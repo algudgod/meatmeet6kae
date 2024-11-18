@@ -68,12 +68,16 @@ public class HomeController {
     }
 
     @GetMapping("/boardList")
-    public String boardList(@RequestParam(value = "boardCategory", required = false)String boardCategory, Model model){
+    public String boardList(@RequestParam(value = "boardCategory", required = false)String boardCategory, HttpSession session, Model model){
+
+        User user = (User)session.getAttribute("user");
+        model.addAttribute("user",user);
 
         List<Board> boards;
-        // boardCode가 없으면 FREE로 설정.
+        // boardCategory가 없으면 FREE로 설정.
         if (boardCategory == null || boardCategory.isEmpty()) {
-            boards = boardService.getBoardsByCategory("FREE");
+            boardCategory = "FREE";
+            boards = boardService.getBoardsByCategory(boardCategory);
         } else {
             boards = boardService.getBoardsByCategory(boardCategory);
         }

@@ -21,9 +21,10 @@
                 <a th:href="@{/boardList(boardCategory='HOT')}" class="tab btn btn-outline-dark me-3" th:classappend="${boardCategory == 'HOT'} ? 'active'">HOT</a>
                 <a th:href="@{/boardList(boardCategory='FREE')}" class="tab btn btn-outline-dark me-3" th:classappend="${boardCategory == 'FREE'} ? 'active'">자유게시판</a>
             </nav>
+
             <!-- 구분선 -->
-            <div class="d-flex justify-content-center">
-                <hr style="width: 100%; border: 1px solid #000;">
+            <div class="d-flex justify-content-center mb-2">
+                <hr style="width: 100%; border: 1px solid #888; margin: 0;">
             </div>
 
             <!-- 게시판 제목 -->
@@ -31,11 +32,12 @@
                 : (boardCategory == 'HOT' ? 'HOT 게시판'
                 : (boardCategory == 'FREE' ? '자유게시판' : '게시판'))}">
             </h2>
+
             <p class="board-description" style="font-size: 15px;">육회를 좋아하는 사람들끼리 자유롭게 소통하는 곳입니다.</p>
 
             <!-- 구분선 -->
             <div class="d-flex justify-content-center mb-2">
-                <hr style="width: 100%; border: 1px solid #000; margin: 0;">
+                <hr style="width: 100%; border: 1px solid #888; margin: 0;">
             </div>
 
             <!-- 게시글 목록 테이블 -->
@@ -53,18 +55,19 @@
                 <tr th:each="board : ${boards}">
                     <td th:text="${board.boardNo}">1</td>
                     <td class="text-start">
-                        <a th:href="@{/boards/{board.boardNo}(boardNo=${board.boardNo})}" th:text="${board.title}">제목</a>
+                        <a th:href="@{/boards/{boardNo}(boardNo=${board.boardNo})}" th:text="${board.title}">제목</a>
+
                     </td>
                     <td th:text="${board.user.nickname}">닉네임</td>
-                    <td th:text="${#temporals.format(board.createDate, 'yyyy-MM-dd')}"></td>
+                    <td th:text="${#temporals.format(board.createDate, 'yyyy-MM-dd HH:mm')}"></td>
                     <td th:text="${board.viewCount}">0</td>
                 </tr>
                 </tbody>
             </table>
 
             <!-- 구분선 -->
-            <div class="d-flex justify-content-center mt-3">
-                <hr style="width: 100%; border: 1px solid #000;">
+            <div class="d-flex justify-content-center mb-2">
+                <hr style="width: 100%; border: 1px solid #888; margin: 0;">
             </div>
 
             <!-- 글쓰기 버튼 -->

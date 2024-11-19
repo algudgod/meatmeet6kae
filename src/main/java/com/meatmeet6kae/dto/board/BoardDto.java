@@ -5,6 +5,8 @@ import jakarta.validation.constraints.Size;
 
 public class BoardDto {
 
+    private int boardNo;
+
     @NotBlank(message = "제목은 필수 입력 항목입니다.")
     @Size(max = 100, message = "100자를 초과하여 등록할 수 없습니다.")
     private String title;
@@ -15,6 +17,15 @@ public class BoardDto {
 
     @NotBlank
     private String boardCategory;
+
+
+    public int getBoardNo() {
+        return boardNo;
+    }
+
+    public void setBoardNo(int boardNo) {
+        this.boardNo = boardNo;
+    }
 
     public String getTitle() {
         return title;
@@ -39,4 +50,5 @@ public class BoardDto {
     public void setBoardCategory(String boardCategory) {
         this.boardCategory = boardCategory;
     }
+
 }

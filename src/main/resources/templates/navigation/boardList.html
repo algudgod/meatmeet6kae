@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>게시판</title>
     <link rel="stylesheet" href="/css/styles.css"> <!-- 로그인과 동일한 CSS 파일 -->
+
 </head>
 <body>
 
@@ -13,72 +14,71 @@
 
 <!-- 게시판 컨테이너 -->
 <div class="container mt-5">
-    <div class="row justify-content-center">
+    <div class="row">
+        <!-- 왼쪽 사이드바 -->
+        <div class="col-md-2">
+            <div class="category-sidebar">
+                <ul>
+                    <!-- 카테고리 목록 동적으로 생성 -->
+                    <li th:each="boardCategory : ${boardCategories}"
+                        th:classappend="${boardCategory.name()} == ${category.name()} ? 'active' : ''">
+                        <a th:href="@{/boardList(boardCategory=${boardCategory.name()})}"
+                           th:text="${boardCategory.boardCategoryName}">
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 오른쪽 게시판 내용 -->
         <div class="col-md-10">
-            <!-- 카테고리 탭 -->
-            <nav class="category-tabs d-flex justify-content-center mb-3">
-                <a th:href="@{/boardList(boardCategory='NOTICE')}" class="tab btn btn-outline-dark me-3" th:classappend="${boardCategory == 'NOTICE'} ? 'active'">공지사항</a>
-                <a th:href="@{/boardList(boardCategory='HOT')}" class="tab btn btn-outline-dark me-3" th:classappend="${boardCategory == 'HOT'} ? 'active'">HOT</a>
-                <a th:href="@{/boardList(boardCategory='FREE')}" class="tab btn btn-outline-dark me-3" th:classappend="${boardCategory == 'FREE'} ? 'active'">자유게시판</a>
-            </nav>
-
-            <!-- 구분선 -->
-            <div class="d-flex justify-content-center mb-2">
-                <hr style="width: 100%; border: 1px solid #888; margin: 0;">
-            </div>
-
             <!-- 게시판 제목 -->
-            <h2 class="board-title" style="font-size: 20px;" th:text="${boardCategory == 'NOTICE' ? '공지사항'
-                : (boardCategory == 'HOT' ? 'HOT 게시판'
-                : (boardCategory == 'FREE' ? '자유게시판' : '게시판'))}">
-            </h2>
+            <h2 class="board-categorytitle" style="font-size: 20px;" th:text="${boardCategoryName}"></h2>
 
-            <p class="board-description" style="font-size: 15px;">육회를 좋아하는 사람들끼리 자유롭게 소통하는 곳입니다.</p>
-
+            <!-- 게시판 부가 설명 -->
+            <p class="board-description" style="font-size: 15px; color: #888;" th:text="${boardDescription}"></p>
+            <p class="board-description" style="font-size: 13px;"> 새글 <span th:text="${todayBoardCount} + ' / ' + ${totalBoardCount}"></span></p>
             <!-- 구분선 -->
             <div class="d-flex justify-content-center mb-2">
                 <hr style="width: 100%; border: 1px solid #888; margin: 0;">
             </div>
-
-            <!-- 게시글 목록 테이블 -->
-            <table class="table table-striped text-center mt-1">
+            <!-- 게시글 목록 -->
+            <table class="table text-center mt-1 board-table">
                 <thead>
                 <tr>
-                    <th style="width: 50px; font-weight: normal;"></th>
-                    <th style="width: 400px; font-weight: normal;">제목</th>
-                    <th style="width: 200px; font-weight: normal;">작성자</th>
-                    <th style="width: 150px; font-weight: normal;">작성일</th>
-                    <th style="width: 100px; font-weight: normal;">조회</th>
+                    <th style="width: 50px;"></th>
+                    <th style="width: 400px;">제목</th>
+                    <th style="width: 200px;">작성자</th>
+                    <th style="width: 150px;">작성일</th>
+                    <th style="width: 100px;">조회</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:each="board : ${boards}">
                     <td th:text="${board.boardNo}">1</td>
                     <td class="text-start">
-                        <a th:href="@{/boards/{boardNo}(boardNo=${board.boardNo})}" th:text="${board.title}">제목</a>
-
+                        <a th:href="@{/boards/{boardNo}(boardNo=${board.boardNo})}"
+                           th:text="${board.title}"
+                           class="board-title" style="font-size:15px;"> 제목 </a>
                     </td>
                     <td th:text="${board.user.nickname}">닉네임</td>
-                    <td th:text="${#temporals.format(board.createDate, 'yyyy-MM-dd HH:mm')}"></td>
-                    <td th:text="${board.viewCount}">0</td>
+                    <td th:text="${board.createDate.toLocalDate().isEqual(T(java.time.LocalDate).now())
+                                ? #temporals.format(board.createDate, 'HH:mm')
+                                : #temporals.format(board.createDate, 'yy.MM.dd')}"></td>
+                    <td th:text="${board.viewCount}">조회수</td>
                 </tr>
                 </tbody>
             </table>
 
-            <!-- 구분선 -->
-            <div class="d-flex justify-content-center mb-2">
-                <hr style="width: 100%; border: 1px solid #888; margin: 0;">
-            </div>
-
             <!-- 글쓰기 버튼 -->
             <div class="d-flex justify-content-end mt-3">
-
-                <a th:if="${user != null}"
-                        th:href="@{/boards/addBoardForm(boardCategory=${boardCategory})}" class="btn btn-dark" style="width: 100px;">글쓰기</a>
+                <a th:if="${user != nudll}"
+                   th:href="@{/boards/addBoardForm(boardCategory=${category.name()})}" class="btn btn-dark" style="width: 100px;">글쓰기</a>
             </div>
         </div>
     </div>
 </div>
+
 
 </body>
 </html>

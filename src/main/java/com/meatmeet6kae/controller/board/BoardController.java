@@ -91,6 +91,8 @@ public class BoardController {
     //게시글 상세 조회
     @GetMapping("{boardNo}")
     public String getBoardDetail(@PathVariable int boardNo, HttpSession session, Model model){
+        //게시글 상세 조회 작동 시, 조회수 +1;
+        boardService.updateViewCount(boardNo);
 
         User user = (User)session.getAttribute("user");
         model.addAttribute("user",user);
@@ -98,7 +100,7 @@ public class BoardController {
         Board board = boardService.getBoardByBoardNo(boardNo);
         model.addAttribute("board",board);
 
-        // boardCategory 가져오기gb
+        // boardCategory 가져오기
         String boardCategory = board.getBoardCategory();
         // boardCategory가 없으면 "FREE"로 설정
         if (boardCategory == null || boardCategory.isEmpty()) {
@@ -121,7 +123,19 @@ public class BoardController {
             return "redirect:/users/login";
         }
 
+        // 게시글 조회
         Board boards = boardService.getBoardByBoardNo(boardNo);
+
+        // 예외: 게시글이 없을 경우
+        if (boards == null) {
+            return "redirect:/boardList";
+        }
+
+        // 예외: 작성자와 세션의 loginId가 일치하지 않는 경우
+        if (!user.getLoginId().equals(boards.getUser().getLoginId())) {
+            return "redirect:/boardList";
+        }
+
         model.addAttribute("boards",boards);
 
         return "boards/editBoard";
@@ -129,24 +143,23 @@ public class BoardController {
 
     //게시글 수정 메서드
     @PostMapping("updateBoard")
-    public String updateBoard(@ModelAttribute Board board, HttpSession session){
+    public String updateBoard(@ModelAttribute BoardDto boardDto, HttpSession session, Model model){
 
         User user = (User)session.getAttribute("user");
-
-        // 예외: 사용자가 로그인 되지 않은 경우
+        // 유효성 검사: 사용자가 로그인하지 않은 경우
         if (user == null) {
             return "redirect:/users/login";
         }
 
-/*        Board boards = boardService.getBoardByBoardNo(board.getBoardNo());
-        if(!user.getLoginId().equals(board.getUser().getLoginId())){
-            return "redirect:/navigation/boardList";
-        }*/
+        Board boards = boardService.getBoardByBoardNo(boardDto.getBoardNo());
+        // 유효성 검사: 게시글이 없거나 작성자와 로그인한 사용자 비교
+        if(boards ==null || !user.getLoginId().equals(boards.getUser().getLoginId())){
+            return "redirect:/boardList";
+        }
 
-        boardService.updateBoard(board);
-
+        boardService.updateBoard(boardDto);
         // 수정 완료 후 , 게시글 상세조회 메서드 호출, boardNo으로 바인딩
-        return "redirect:/boards/"+board.getBoardNo();
+        return "redirect:/boards/"+boardDto.getBoardNo();
     }
 
     //게시글 삭제 메서드
@@ -160,13 +173,9 @@ public class BoardController {
             return "redirect:/users/login";
         }
 
-/*        Board board = boardService.getBoardByBoardNo(boardNo);
-        if(!user.getLoginId().equals(board.getUser().getLoginId())){
-            return "redirect:/navigation/boardList";
-        }*/
-
-        boardService.deleteBoard(boardNo);
-
+        // 게시글 삭제
+        boardService.deleteBoard(boardNo, user);
+        // 게시글 삭제 성공 시 목록으로 리다이렉트
         return "redirect:/boardList";
     }
 

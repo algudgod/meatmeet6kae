@@ -9,6 +9,6 @@ import java.util.Optional;
 
 @Repository
 public interface BoardRepository extends JpaRepository<Board, Integer> {
-    List<Board>findByBoardCategory(String boardCategory);
+    List<Board>findByBoardCategoryOrderByBoardNoDesc(String boardCategory);
     Optional<Board> findByBoardNo(int boardNo);
 }

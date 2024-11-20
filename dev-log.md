@@ -11,6 +11,137 @@
   - 기타: Naver SMTP(이메일발송).
 ---
 
+## 📅 2024.11.20
+### 오늘 한 일 (요약)
+- 컨트롤러에서 비즈니스 로직 제거 및 서비스 계층으로 분리.
+- 내 정보 보기: 폼 UI 개선 및 닉네임 필드 추가.
+- 스크롤바 위치에 따라 움직이는 화면 고정.
+- 게시글 조회수 로직 수정: 작성자가 자신의 글을 조회할 경우 조회수 증가 방지.
+- 게시글 상세조회에 `BoardCategory` Enum 적용 및 컨트롤러와 서비스 역할 분리.
+
+### 이유
+- 컨트롤러는 HTTP 요청 처리 및 데이터 전달 역할에 집중하고, 비즈니스 로직은 서비스 계층에서 처리하도록 리팩토링하여 가독성, 재사용성, 유지보수성을 강화하기 위함.
+- 스크롤바 유무에 따라 화면 레이아웃이 달라지는 불편함을 해소하고자 화면 고정 방식을 도입.
+- 게시글 조회수 증가 로직이 부정확했던 문제를 해결하고, 데이터의 신뢰성을 높이고자 로직을 수정.
+- 게시글 상세 조회 시 카테고리를 String 대신 Enum으로 처리하여 오류 방지, 가독성 향상, 그리고 로직의 안정성을 높이기 위함.
+- 
+### 내용
+#### 1. 컨트롤러와 서비스 계층 분리
+- 게시글 상세 조회 비즈니스 로직을 컨트롤러에서 서비스로 이동.
+  ```plaintext 
+    // 변경 전 (컨트롤러)
+    Board board = boardService.getBoardByBoardNo(boardNo);
+    model.addAttribute("board", board);
+    
+    // 카테고리 기본값 설정
+    String boardCategory = board.getBoardCategory();
+    if (boardCategory == null || boardCategory.isEmpty()) {
+    boardCategory = "FREE";
+    }
+    model.addAttribute("boardCategory", boardCategory);
+    return "boards/boardDetail";
+    
+    // 변경 후 (서비스 계층)
+    @Transactional
+    public Board getBoardDefaultCategory(int boardNo) {
+    Board board = getBoardByBoardNo(boardNo);
+    if (board.getBoardCategory() == null || board.getBoardCategory().isEmpty()) {
+    board.setBoardCategory("FREE");
+    }
+    return board;
+    }
+    
+    // 변경 후 (컨트롤러)
+    Board board = boardService.getBoardDefaultCategory(boardNo);
+    model.addAttribute("board", board);
+    model.addAttribute("boardCategory", board.getBoardCategory());
+    return "boards/boardDetail";
+
+#### 2. 내 정보 보기 폼 수정
+- 닉네임 필드를 추가하고, 데이터가 정렬되도록 폼 레이아웃을 개선.
+
+#### 3, 스크롤바 위치 조정
+- s레이아웃이 스크롤 유무에 따라 움직이는 문제를 해결하기 위해 스크롤바를 항상 표시하도록 수정.
+  ```plaintext 
+  /* styles.css */
+  html {
+  overflow-y: scroll; /* 스크롤바를 항상 표시 */
+  }
+
+#### 4. 게시글 조회수 로직 수정
+- 작성자가 자신의 글을 조회했을 때 조회수가 올라가지 않도록 로직에 조건 추가.
+  ```plaintext 
+    @Transactional
+    public void updateViewCount(int boardNo, User user) {
+    Board board = getBoardByBoardNo(boardNo);
+    if (user == null || !board.getUser().getLoginId().equals(user.getLoginId())) {
+    board.setViewCount(board.getViewCount() + 1);
+    }
+  }
+  
+#### 5. 게시글 상세 조회에 `BoardCategory` Enum 적용.
+- String 대신 `BoardCategory` Enum을 사용하도록 리팩토링하여 안정성을 강화.
+- 컨트롤러에서 `BoardCategory` 처리 로직을 서비스로 이동하여 코드 간소화.
+  ```plaintext
+  controller 코드 추가.
+    Board board = boardService.getBoardDefaultCategory(boardNo);
+    model.addAttribute("board",board);
+
+    BoardCategory[] boardCategories = BoardCategory.values();
+    model.addAttribute("boardCategorys",boardCategories);
+
+    BoardCategory category = BoardCategory.valueOf(board.getBoardCategory());
+    model.addAttribute("boardCategory", category);
+  
+  html
+  변경 전,
+  <h2 class="boardDetail-title" style="font-size: 15px;" th:text="${boardCategory == 'NOTICE' ? '공지사항'
+                : (boardCategory == 'HOT' ? 'HOT 게시판'
+                : (boardCategory == 'FREE' ? '자유게시판' : '게시판'))}"> </h2>
+  변경 후,
+  <h2 class="boardDetail-title" style="font-size: 15px" th:text="${boardCategory.boardCategoryName}"></h2>
+  
+- `boardList`를 참고하여 작성을 완료하였으나, 컨트롤러에 비즈니스 로직을 서비스 계층으로 분리하는 리팩토링 추가 개선을 하고자 함.
+  - 
+    ```plaintext
+  // 서비스: Enum 변환 및 반환 메서드 추가
+  public BoardCategory[] getAllBoardCategories() {
+  return BoardCategory.values();
+  }
+  
+  public BoardCategory getBoardCategoryEnum(String boardCategory) {
+  return BoardCategory.valueOf(boardCategory);
+  }
+  
+  // 컨트롤러: Enum 관련 로직 제거 후 서비스 호출
+  Board board = boardService.getBoardDefaultCategory(boardNo);
+  model.addAttribute("board", board);
+  model.addAttribute("boardCategorys", boardService.getAllBoardCategories());
+  model.addAttribute("boardCategory", boardService.getBoardCategoryEnum(board.getBoardCategory()));
+
+### 느낀점
+- 컨트롤러와 비즈니스 로직을 서비스로 분리하면서 코드가 간결해지고, 유지보수가 쉬워졌다는 점에서 성취감을 느겼다. 조회수 로직에서 작성자의 조회를 제외하는 조건은 단순하지만 이 조건의 필요성을 알게되었고, 작은 기능이라도 하나씩 개선하고 완성하는 과정에서 성취감이 더욱 느껴지고, 점점 코드 작성이 재밌고 익숙해지는 것을 느낀다.
+- `boardCategory` Enum을 활용해 카테고리 처리로직이 명확해지고 안정성이 향상된 점에서 앞으로의 확장 작업이나 수정 작업이 용이할 것 같다는 자신감이 생겼다.
+
+### 배운점
+- 컨트롤러와 서비스의 역할 분리가 가독성 및 유지보수성에 얼마나 중요한지 체감하고, 앞으로 코드를 작성할 때 각 계층의 역할을 명확히 해야겠다고 느낌.
+- Enum 활용으로 로직의 단순화 및 안정성을 높이는 방법을 익힘.
+- CSS를 활용하여 UI/UX를 개선하는 방법과 overflow-y 속성을 통한 레이아웃 고정 방법을 알게 됨.
+
+### 예정 작업
+- 게시판 기능 개선
+  - 게시판 목록에서 말머리 기능 추가.
+- 회원 관리 기능 개선
+  - 회원 정보 수정 시 닉네임 변경 가능하도록 기능 확장.
+- 게시판 공지사항을 상단에 고정하는 기능 구현.
+- 댓글 기능 구현.
+  - 게시글 하단에서 로그인한 회원이 댓글 작성, 수정, 삭제 가능.
+- SNS 간편 로그인 도입.
+- 배포환경 설정
+  - CI/CD 파이프라인 구축.
+
+
+---
 ## 📅 2024.11.19
 ### 오늘 한 일 (요약)
 - **게시글 수정 및 삭제 기능 개선**

@@ -1,5 +1,6 @@
 package com.meatmeet6kae.service.board;
 
+import com.meatmeet6kae.common.enums.BoardCategory;
 import com.meatmeet6kae.dto.board.BoardDto;
 import com.meatmeet6kae.entity.board.Board;
 import com.meatmeet6kae.entity.user.User;
@@ -8,13 +9,9 @@ import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.Model;
-
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
+
 
 @Service
 public class BoardService {
@@ -81,9 +78,29 @@ public class BoardService {
 
     // 게시글 조회수 계산
     @Transactional
-    public void updateViewCount(int boardNo){
+    public void updateViewCount(int boardNo, User user){
         Board board = getBoardByBoardNo(boardNo);
 
+        if(user == null || !board.getUser().getLoginId().equals(user.getLoginId()))
         board.setViewCount(board.getViewCount()+1);
+    }
+
+    // 게시글 카테고리 검증 및 기본값 설정
+    public Board getBoardDefaultCategory(int boardNo){
+        Board board = getBoardByBoardNo(boardNo);
+
+        //카테고리 기본 값 설정
+        if(board.getBoardCategory()== null || board.getBoardCategory().isEmpty()){
+            board.setBoardCategory("FREE");
+        }
+        return board;
+    }
+    // 모든 Enum BoardCategory
+    public BoardCategory[] getAllBoardCategorys() {
+        return BoardCategory.values();
+    }
+    // BoardCategory 변환 (String -> Enum)
+    public BoardCategory getBoardCategoryEnum(String boardCategory) {
+        return BoardCategory.valueOf(boardCategory);
     }
 }

@@ -11,6 +11,13 @@
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
  */
 
+
+
+/*Common*/
+html {
+    overflow-y: scroll; /* 스크롤바를 항상 표시 */
+}
+/* Board */
 /* boardList의 기본 제목 스타일 */
 .board-title {
     color: black;
@@ -59,6 +66,15 @@
 .category-sidebar li {
     margin-bottom: 5px; /* 항목 간 간격 */
 }
+
+/* User */
+
+
+
+
+
+
+
 
 :root {
   --bs-blue: #0d6efd;

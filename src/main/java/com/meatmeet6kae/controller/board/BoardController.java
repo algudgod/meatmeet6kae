@@ -1,5 +1,6 @@
 package com.meatmeet6kae.controller.board;
 
+import com.meatmeet6kae.common.enums.BoardCategory;
 import com.meatmeet6kae.controller.user.UserController;
 import com.meatmeet6kae.dto.board.BoardDto;
 import com.meatmeet6kae.entity.board.Board;
@@ -8,8 +9,6 @@ import com.meatmeet6kae.service.board.BoardService;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -20,7 +19,6 @@ import java.util.List;
 @Controller
 @RequestMapping("/boards")
 public class BoardController {
-
     // 디버깅
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
@@ -91,22 +89,18 @@ public class BoardController {
     //게시글 상세 조회
     @GetMapping("{boardNo}")
     public String getBoardDetail(@PathVariable int boardNo, HttpSession session, Model model){
-        //게시글 상세 조회 작동 시, 조회수 +1;
-        boardService.updateViewCount(boardNo);
 
         User user = (User)session.getAttribute("user");
         model.addAttribute("user",user);
 
-        Board board = boardService.getBoardByBoardNo(boardNo);
+        //게시글 상세 조회 작동 시, 조회수 +1;
+        boardService.updateViewCount(boardNo,user);
+
+        Board board = boardService.getBoardDefaultCategory(boardNo);
         model.addAttribute("board",board);
 
-        // boardCategory 가져오기
-        String boardCategory = board.getBoardCategory();
-        // boardCategory가 없으면 "FREE"로 설정
-        if (boardCategory == null || boardCategory.isEmpty()) {
-            boardCategory = "FREE";
-        }
-        model.addAttribute("boardCategory", boardCategory);
+        model.addAttribute("boardCategorys",boardService.getAllBoardCategorys());
+        model.addAttribute("boardCategory", boardService.getBoardCategoryEnum(board.getBoardCategory()));
 
         return "boards/boardDetail";
     }

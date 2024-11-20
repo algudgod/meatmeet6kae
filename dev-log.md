@@ -102,7 +102,6 @@
   <h2 class="boardDetail-title" style="font-size: 15px" th:text="${boardCategory.boardCategoryName}"></h2>
   
 - `boardList`를 참고하여 작성을 완료하였으나, 컨트롤러에 비즈니스 로직을 서비스 계층으로 분리하는 리팩토링 추가 개선을 하고자 함.
-  - 
     ```plaintext
   // 서비스: Enum 변환 및 반환 메서드 추가
   public BoardCategory[] getAllBoardCategories() {

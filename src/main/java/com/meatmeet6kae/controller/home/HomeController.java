@@ -1,6 +1,7 @@
 package com.meatmeet6kae.controller.home;
 
 import com.meatmeet6kae.common.enums.BoardCategory;
+import com.meatmeet6kae.dto.board.BoardDto;
 import com.meatmeet6kae.entity.board.Board;
 import com.meatmeet6kae.entity.user.User;
 import com.meatmeet6kae.service.board.BoardService;
@@ -81,7 +82,6 @@ public class HomeController {
         System.out.println("boardCategories"+boardCategories);
         System.out.println("Arrays.toString().boardCategories="+ Arrays.toString(boardCategories));
         for(BoardCategory boardCategorys: boardCategories){
-            System.out.println("name="+boardCategorys.name()+", ordinal"+boardCategorys.ordinal());
         } // 모든 열거형 뷰로 전달
         model.addAttribute("boardCategories",boardCategories);
 
@@ -92,9 +92,8 @@ public class HomeController {
         // 선택된 카테고리는 String으로 넘어오기 때문에, valueOf로 Enum 변환(오류방지)
         BoardCategory category = BoardCategory.valueOf(boardCategory);
         model.addAttribute("category",category);
-
+/*
         List<Board> boards = boardService.getBoardsByCategory(boardCategory);
-
         // 새글
         int todayBoardCount = 0; //오늘의 게시글 초기화
         LocalDate today = LocalDate.now(); //오늘 날짜 가져오기
@@ -102,15 +101,23 @@ public class HomeController {
             if (board.getCreateDate().toLocalDate().isEqual(today)) {
                 todayBoardCount++;
             }
+        }*/
+        List<BoardDto> boardDtos = boardService.getBoardWithCategoryNumbers(boardCategory);
+
+        // 디버깅 로그 추가: boardDtos 리스트 출력
+        System.out.println("boardDtos size: " + boardDtos.size());  // 여기서 사이즈를 확인하여 데이터가 있는지 확인
+        for (BoardDto boardDtoItem : boardDtos) {
+            System.out.println("BoardDto: " + boardDtoItem.getBoardNo() + ", " + boardDtoItem.getTitle());  // 데이터 확인
         }
 
-        model.addAttribute("boards", boards);
+        model.addAttribute("boards", boardDtos);
+        //model.addAttribute("boards", boards);
         //model.addAttribute("boardCategory", boardCategory);
         model.addAttribute("boardCategoryName",category.getBoardCategoryName());
         model.addAttribute("boardDescription",category.getBoardDescription());
         model.addAttribute("page","boardList");
-        model.addAttribute("todayBoardCount",todayBoardCount);
-        model.addAttribute("totalBoardCount",boards.size());
+/*        model.addAttribute("todayBoardCount",todayBoardCount);
+        model.addAttribute("totalBoardCount",boards.size());*/
         return "navigation/boardList";
     }
 

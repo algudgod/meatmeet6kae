@@ -17,6 +17,7 @@
 html {
     overflow-y: scroll; /* 스크롤바를 항상 표시 */
 }
+
 /* Board */
 /* boardList의 기본 제목 스타일 */
 .board-title {

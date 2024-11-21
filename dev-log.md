@@ -12,6 +12,169 @@
 ---
 
 ## 📅 2024.11.20
+### 오늘 한 일 (요약) 
+- 조회수 로직 개선
+- 글쓰기 시 현재 게시판을 표시하되, 게시판 선택 기능 추가.
+- 카테고리 별 고유한 게시글 번호 부여 기능 구현.
+
+### 이유 
+- 사용자의 경험 상 비회원의 경우 글 읽기가 가능하나 조회수가 올라가지 않는 것이 일반적임을 깨달음.
+- 사용자의 경험의 향상을 위해 글쓰기 시 현재 게시판을 보여주고, 선택도 가능하도록 개선하는 것이 필요하다고 느낌.
+- 각 게시판마다 게시글번호를 부여하여, 정렬하고자 함.
+
+### 내용
+#### 1. 조회수 로직 개선
+- user가 null이 아닌 조건을 추가.
+  ```plaintext 
+  if user != null 코드 추가.
+  
+#### 2. 글쓰기 페이지 개선
+- 현재 게시판을 기본값으로 표시하되, 드롭 다운으로 다른 게시판 선택 가능하도록 HTML 수정.
+- 서버에서 게시판 목록 데이터를 받아와 동적으로 렌더링.
+  ```plaintext 
+  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+    <th:block th:each="category : ${boardCategorys}">
+        <li>
+            <a class="dropdown-item" href="#"
+               th:data-value="${category}"
+               th:text="${category.boardCategoryName}"
+               onclick="selectCategory(this)">
+            </a>
+        </li>
+    </th:block>
+  </ul>
+  
+#### 3. 카테고리 별 번호 부여
+- 레포지토리에서 `ROW_NUMBER()`를 사용하여 SQL 쿼리를 작성하고, 카테고리 별로 게시글 번호를 동적으로 계산.
+  ```plaintext 
+    @Query(value = "SELECT " +
+            "b.board_category, " +
+            "ROW_NUMBER() OVER (PARTITION BY b.board_category ORDER BY b.board_no) AS categoryBoardNo, " +
+            "b.board_no, " +
+            "b.title, " +
+            "b.content, " +
+            "u.nickname, " +
+            "b.create_date " +  // create_date 추가
+            "FROM board b " +
+            "JOIN user u ON b.login_id = u.login_id " + // User 테이블과 조인
+            "WHERE b.board_category = :boardCategory",
+            nativeQuery = true)
+    List<Object[]> findByCategoryWithRowNumber(@Param("boardCategory") String boardCategory);
+- 카테고리별 ROW_NUMBER를 계산하여 동적으로 번호가 매겨진 게시글 정보를 가져옴.
+- SELECT로 boardCategory를 가져오고, ROW_NUMBER로 각 행에 고유한 번호(categoryBoardNo)를 붙임.
+  boardCategory 기준으로 데이터를 partition하고, 번호를 부여한 후, order by boardNo 순으로 정렬.
+  부여된 번호를 categoryBoardNo으로 지정.
+  boardCategory 파라미터 값이 :boardCategory에 대입되어 필터링.
+
+ **JOIN 활용**
+ - board 테이블과 user 테이블을 조인하여 작성자 닉네임(nickname)을 가져옵니다.
+ - board.user_id와 user.id를 연결(JOIN)하여 닉네임 정보를 가져옵니다.
+ - 게시판의 작성자 정보를 표시하기 위해 JOIN이 필요합니다.
+
+ **쿼리 필드 설명**
+ - b.boardCategory: 게시글의 카테고리
+ - ROW_NUMBER() OVER(PARTITION BY b.boardCategory ORDER BY b.boardNo): 카테고리별로 순번(categoryBoardNo)을 생성
+ - b.boardNo: 게시글 고유 번호
+ - b.title: 게시글 제목
+ - b.content: 게시글 내용
+ - u.nickname: 작성자의 닉네임
+
+- 서비스에서 Dto로 변환하여 처리.
+  ```plaintext
+      // 특정 카테고리 별로 고유한 번호가 매겨진 게시글을 조회
+    public List<BoardDto> getBoardWithCategoryNumbers(String boardCategory){
+        // 레포지토리에서 List<Object[]> 형태로 반환하는 findByCategoryWithRowNumber을 사용하기 위해 호출
+        List<Object[]> rows = boardRepository.findByCategoryWithRowNumber(boardCategory);
+        /* Object[] 배열로 담겨있는 여러개의 데이터를 필드명으로 명확하게 보기 위해 Dto 객체로 변환.
+        변환된 객체를 한 곳에 모아 저장해야하는데, 빈 저장소를 만들어 준비.
+        반복문으로 List<Object[]> 데이터를 하나씩 꺼내서 Dto로 변환. set으로 저장할 데이터 넣기.
+            List<Object[]>는
+               [0]: boardCategory
+               [1]: categoryBoardNo (ROW_NUMBER로 생성된 카테고리별 글 번호)
+               [2]: boardNo (전체 고유 글 번호)
+               [3]: title
+               [4]: content
+        */
+        List<BoardDto> boards = new ArrayList<>(); //빈 저장소
+        for(Object[] row : rows) {
+            BoardDto boardDto = new BoardDto();
+            boardDto.setBoardCategory((String) row[0]);
+            boardDto.setCategoryBoardNo(((Number) row[1]).intValue());
+            boardDto.setBoardNo(((Number) row[2]).intValue());
+            boardDto.setTitle((String) row[3]);
+            boardDto.setContent((String) row[4]);
+            boardDto.setNickname((String) row[5]);
+            boardDto.setCreateDate(((Timestamp) row[6]).toLocalDateTime());
+
+            boards.add(boardDto);
+        }
+        // Dto객체 오름차순으로 정렬
+        //sort()사용법. board2의 boardNo와 board1의 boardNo를 비교하여 board2가 board1보다 크면 (즉, 내림차순 정렬) 앞에 오도록 설정
+        boards.sort((board1, board2) -> Integer.compare(board2.getBoardNo(), board1.getBoardNo()));
+        return boards;
+    }
+
+  ```plaintext
+    @GetMapping("/boardList")
+    public String boardList(@RequestParam(value = "boardCategory", required = false)String boardCategory, HttpSession session, Model model){
+
+        User user = (User)session.getAttribute("user");
+        model.addAttribute("user",user);
+
+        // 모든 열거형(ENUM 반환)
+        BoardCategory[] boardCategories = BoardCategory.values();
+        System.out.println("boardCategories"+boardCategories);
+        System.out.println("Arrays.toString().boardCategories="+ Arrays.toString(boardCategories));
+        for(BoardCategory boardCategorys: boardCategories){
+        } // 모든 열거형 뷰로 전달
+        model.addAttribute("boardCategories",boardCategories);
+
+        // boardCategory가 없다면 기본값으로 FREE 설정
+        if(boardCategory == null|| boardCategory.isEmpty()){
+            boardCategory = "FREE";
+        }
+        // 선택된 카테고리는 String으로 넘어오기 때문에, valueOf로 Enum 변환(오류방지)
+        BoardCategory category = BoardCategory.valueOf(boardCategory);
+        model.addAttribute("category",category);
+
+        List<BoardDto> boardDtos = boardService.getBoardWithCategoryNumbers(boardCategory);
+        model.addAttribute("boards", boardDtos);
+  
+        model.addAttribute("boardCategoryName",category.getBoardCategoryName());
+        model.addAttribute("boardDescription",category.getBoardDescription());
+        model.addAttribute("page","boardList");
+        return "navigation/boardList";
+  }
+
+  <tr th:each="board : ${boardDtos}">
+      <td th:text="${board.categoryBoardNo}">1</td> <!-- 카테고리별 고유 번호 -->
+      <td th:text="${board.title}"> 제목 </td>
+      <td th:text="${board.nickname}">닉네임</td>
+      <td th:text="${board.createDate.toLocalDate().isEqual(T(java.time.LocalDate).now()) ? #temporals.format(board.createDate, 'HH:mm') : #temporals.format(board.createDate, 'yy.MM.dd')}"></td>
+      <td th:text="${board.viewCount}">조회수</td>
+  </tr>
+
+#### 문제점 및 해결 방법
+- **문제1:** 게시글 목록을 조회 시 필요한 필드를 제대로 확인하지 않아 오류 발생.
+- **해결방법:** 사용하고 있는 dto에 필드의 유무를 확인하고 추가.
+- **문제2:** 엔티티 -> Dto로 변환하는 과정에서 바인딩 오류
+- **해결방법:** html 코드를 차근히 읽어가며 엔티티가 있는지 확인하며 수정.
+
+
+
+### 느낀점
+- 작은 UX 개선이 사용자의 입장에서는 큰 차이를 만들 수 있다는 점을 다시금 체감하였다.
+- ROW_NUMBER()를 사용한 SQL 쿼리 작성은 정말 힘들었다. 하지만 꼭 필요하다는 것을 알고 끝까지 시도했고, 성공하고나서 성취감이 컸다.
+  어려운 길일 수록 침착하게 계층과 코드의 흐름을 이해하며 코드를 작성하려고 노력하였다. 오류가 나는 것은 당연하다고 생각하며 당황하지 않고 읽고 해결하려고 했다. Dto에 빠진 필드들을 추가하고, 뷰에서 처리하는 도중에 빠드려서 오류가 났지만 하나씩 해결하면서 결국엔 목록을 불러오는데 성공했다.
+
+### 배운점
+- 글쓰기 페이지에서 드롭다운을 사용하고자 bootStrap에서 코드를 참고하였는데, href="#"이 무엇일까? 궁금했다. a 태그에서는 브라우저 기본 동작으로 페이지의 최상단으로 이동하거나, 특정 상황에서 페이지를 새로고침할 수 있는데, 이런 동작은 사용자가 원하지 않는 결과를 초래할 수 있다. 그래서 이러한  의도치 않은 페이지 새로고침을 방지하기 위해 href="#" 을 사용하는 것을 알게 되었다.
+- SQL을 오랜만에 사용해보면서 다시 한 번 사용법을 되뇌어 활용해보면서 잘 작성할 수 있었다.
+- Thymeleaf에서 리스트를 출력할때 th:each와 th:text 등 활용하여 반복문으로 데이터를 처리하는 법을 복습하였다.
+
+
+---
+## 📅 2024.11.20
 ### 오늘 한 일 (요약)
 - 컨트롤러에서 비즈니스 로직 제거 및 서비스 계층으로 분리.
 - 내 정보 보기: 폼 UI 개선 및 닉네임 필드 추가.

@@ -1,7 +1,11 @@
 package com.meatmeet6kae.dto.board;
 
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDateTime;
 
 public class BoardDto {
 
@@ -18,6 +22,47 @@ public class BoardDto {
     @NotBlank
     private String boardCategory;
 
+    private String nickname; // 작성자 닉네임 추가
+
+    private int categoryBoardNo; // 카테고리별 게시글 번호
+
+    private int viewCount;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
+    private LocalDateTime createDate;
+
+
+    public LocalDateTime getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(LocalDateTime createDate) {
+        this.createDate = createDate;
+    }
+
+    public int getViewCount() {
+        return viewCount;
+    }
+
+    public void setViewCount(int viewCount) {
+        this.viewCount = viewCount;
+    }
+
+    public int getCategoryBoardNo() {
+        return categoryBoardNo;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void setCategoryBoardNo(int categoryBoardNo) {
+        this.categoryBoardNo = categoryBoardNo;
+    }
 
     public int getBoardNo() {
         return boardNo;

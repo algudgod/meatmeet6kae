@@ -31,9 +31,21 @@ public class BoardController {
 
     // 게시판 글쓰기 form을 보여주는 메서드
     @GetMapping("/addBoardForm")
-    public String addBoardForm(@RequestParam("boardCategory")String boardCategory, Model model) {
+    public String addBoardForm(@RequestParam("boardCategory")String boardCategory, HttpSession session, Model model) {
+
+        User user = (User) session.getAttribute("user");
+        model.addAttribute("user", user);
+
+        //게시글 작성 폼에서 사용될 데이터를 저장하는 새로운 Dto 객체 생성
         BoardDto boardDto = new BoardDto();
-        boardDto.setBoardCategory(boardCategory);
+        //(String -> Eunm으로 BoardCategory를 변환하여 categoryEnum에 담음.
+        BoardCategory categoryEnum = boardService.getBoardCategoryEnum(boardCategory);
+        //boardDto의 boardCategory가 String이기때문에 Enum을 직접 대입할 수 없어 toString() 또는 name()을 사용하여 문자열로 변환.
+        boardDto.setBoardCategory(categoryEnum.toString());
+
+        model.addAttribute("boardCategorys",boardService.getAllBoardCategorys()); // 전체 게시판 카테고리 목록
+        model.addAttribute("boardCategory",categoryEnum); // 사용자가 요청한 카테고리를 Enum으로 변환.
+
         model.addAttribute("boardDto",boardDto);
         return "boards/addBoardForm";
     }
@@ -52,6 +64,7 @@ public class BoardController {
         model.addAttribute("user", user);
 
         logger.debug("boardCategory: {}", boardCategory);
+
         List<Board> boards = boardService.getBoardsByCategory(boardCategory);
         model.addAttribute("boards", boards);
         model.addAttribute(("boardCategory"), boardCategory);

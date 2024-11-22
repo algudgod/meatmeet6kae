@@ -22,7 +22,6 @@ public class BoardController {
     // 디버깅
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
-    //BoardService 로직 호출
     private final BoardService boardService;
 
     public BoardController(BoardService boardService) {
@@ -36,7 +35,6 @@ public class BoardController {
         User user = (User) session.getAttribute("user");
         model.addAttribute("user", user);
 
-        //게시글 작성 폼에서 사용될 데이터를 저장하는 새로운 Dto 객체 생성
         BoardDto boardDto = new BoardDto();
         //(String -> Eunm으로 BoardCategory를 변환하여 categoryEnum에 담음.
         BoardCategory categoryEnum = boardService.getBoardCategoryEnum(boardCategory);
@@ -45,7 +43,6 @@ public class BoardController {
 
         model.addAttribute("boardCategorys",boardService.getAllBoardCategorys()); // 전체 게시판 카테고리 목록
         model.addAttribute("boardCategory",categoryEnum); // 사용자가 요청한 카테고리를 Enum으로 변환.
-
         model.addAttribute("boardDto",boardDto);
         return "boards/addBoardForm";
     }
@@ -53,9 +50,8 @@ public class BoardController {
     @GetMapping("")
     public String getBoardList(@RequestParam("boardCategory")String boardCategory, HttpSession session, Model model){
 
-        //세션에서 로그인 된 사용자의 정보를 가져옴(header의 동적 로그인/로그아웃)
         User user = (User)session.getAttribute("user");
-        // 디버깅 로그 추가
+        // 디버깅
         if (user != null) {
             logger.debug("Logged-in user: {}", user.getLoginId());
         } else {
@@ -102,20 +98,25 @@ public class BoardController {
     //게시글 상세 조회
     @GetMapping("{boardNo}")
     public String getBoardDetail(@PathVariable int boardNo, HttpSession session, Model model){
+        try {
+            User user = (User)session.getAttribute("user");
+            model.addAttribute("user",user);
 
-        User user = (User)session.getAttribute("user");
-        model.addAttribute("user",user);
+            // 조회수 증가
+            boardService.updateViewCount(boardNo,user);
 
-        //게시글 상세 조회 작동 시, 조회수 +1;
-        boardService.updateViewCount(boardNo,user);
+            Board board = boardService.getBoardDefaultCategory(boardNo);
+            model.addAttribute("board",board);
 
-        Board board = boardService.getBoardDefaultCategory(boardNo);
-        model.addAttribute("board",board);
+            model.addAttribute("boardCategorys",boardService.getAllBoardCategorys());
+            model.addAttribute("boardCategory", boardService.getBoardCategoryEnum(board.getBoardCategory()));
 
-        model.addAttribute("boardCategorys",boardService.getAllBoardCategorys());
-        model.addAttribute("boardCategory", boardService.getBoardCategoryEnum(board.getBoardCategory()));
+            return "boards/boardDetail";
+        }catch(IllegalArgumentException e){
+            model.addAttribute("errorMessage",e.getMessage());
+            return "errors/boardNullErrorPage";
 
-        return "boards/boardDetail";
+        }
     }
 
     //게시글 수정 폼을 보여주는 메서드
@@ -130,7 +131,6 @@ public class BoardController {
             return "redirect:/users/login";
         }
 
-        // 게시글 조회
         Board boards = boardService.getBoardByBoardNo(boardNo);
 
         // 예외: 게시글이 없을 경우
@@ -171,19 +171,25 @@ public class BoardController {
 
     //게시글 삭제 메서드
     @PostMapping("/deleteBoard/{boardNo}")
-    public String deleteBoard(@PathVariable int boardNo, HttpSession session){
+    public String deleteBoard(@PathVariable int boardNo, HttpSession session, Model model){
 
-        User user = (User)session.getAttribute("user");
+        try {
+            User user = (User) session.getAttribute("user");
 
-        // 예외: 사용자가 로그인 되지 않은 경우
-        if (user == null) {
-            return "redirect:/users/login";
+            // 예외: 사용자가 로그인 되지 않은 경우
+            if (user == null) {
+                return "redirect:/users/login";
+            }
+
+            // 게시글 삭제
+            boardService.deleteBoard(boardNo, user);
+            // 게시글 삭제 성공 시 목록으로 리다이렉트
+            return "redirect:/boardList";
+        }catch (IllegalArgumentException e) {
+            model.addAttribute("errorMessage", e.getMessage());
+            return "errors/boardNullErrorPage";
         }
-
-        // 게시글 삭제
-        boardService.deleteBoard(boardNo, user);
-        // 게시글 삭제 성공 시 목록으로 리다이렉트
-        return "redirect:/boardList";
     }
+
 
 }

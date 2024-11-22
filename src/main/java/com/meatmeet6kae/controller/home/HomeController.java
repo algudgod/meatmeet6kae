@@ -81,6 +81,7 @@ public class HomeController {
         BoardCategory[] boardCategories = BoardCategory.values();
         System.out.println("boardCategories"+boardCategories);
         System.out.println("Arrays.toString().boardCategories="+ Arrays.toString(boardCategories));
+
         for(BoardCategory boardCategorys: boardCategories){
         } // 모든 열거형 뷰로 전달
         model.addAttribute("boardCategories",boardCategories);
@@ -103,12 +104,6 @@ public class HomeController {
             }
         }*/
         List<BoardDto> boardDtos = boardService.getBoardWithCategoryNumbers(boardCategory);
-
-        // 디버깅 로그 추가: boardDtos 리스트 출력
-        System.out.println("boardDtos size: " + boardDtos.size());  // 여기서 사이즈를 확인하여 데이터가 있는지 확인
-        for (BoardDto boardDtoItem : boardDtos) {
-            System.out.println("BoardDto: " + boardDtoItem.getBoardNo() + ", " + boardDtoItem.getTitle());  // 데이터 확인
-        }
 
         model.addAttribute("boards", boardDtos);
         //model.addAttribute("boards", boards);

@@ -12,31 +12,16 @@ import java.util.Optional;
 @Repository
 public interface BoardRepository extends JpaRepository<Board, Integer> {
 
-    // 카테고리별로 내림차순 정렬된 게시글 조회
+    // 카테고리별로 최신 게시글 목록 조회 (DESC)
     List<Board> findByBoardCategoryOrderByBoardNoDesc(String boardCategory);
 
-    // 특정 게시글 번호로 조회
+    // 게시글 번호로 게시글 찾기
     Optional<Board> findByBoardNo(int boardNo);
 
-
-    /* 카테고리별 ROW_NUMBER를 계산하여 동적으로 번호가 매겨진 게시글 정보를 가져옴.
-       SELECT로 boardCategory를 가져오고, ROW_NUMBER로 각 행에 고유한 번호(categoryBoardNo)를 붙임.
-       boardCategory 기준으로 데이터를 partition하고, 번호를 부여한 후, order by boardNo 순으로 정렬.
-       부여된 번호를 categoryBoardNo으로 지정.
-       boardCategory 파라미터 값이 :boardCategory에 대입되어 필터링.
-
-       **JOIN 활용**:
-       - board 테이블과 user 테이블을 조인하여 작성자 닉네임(nickname)을 가져옵니다.
-       - board.user_id와 user.id를 연결(JOIN)하여 닉네임 정보를 가져옵니다.
-       - 게시판의 작성자 정보를 표시하기 위해 JOIN이 필요합니다.
-
-       **쿼리 필드 설명**:
-       - b.boardCategory: 게시글의 카테고리
-       - ROW_NUMBER() OVER(PARTITION BY b.boardCategory ORDER BY b.boardNo): 카테고리별로 순번(categoryBoardNo)을 생성
-       - b.boardNo: 게시글 고유 번호
-       - b.title: 게시글 제목
-       - b.content: 게시글 내용
-       - u.nickname: 작성자의 닉네임
+    /**
+     * 특정 카테고리의 게시글을 ROW_NUMBER와 함께 조회 (User 테이블 조인)
+     * @param boardCategory 게시판 카테고리
+     * @return 게시글 정보와 카테고리별 번호 (Object 배열)
      */
     @Query(value = "SELECT " +
             "b.board_category, " +
@@ -51,17 +36,5 @@ public interface BoardRepository extends JpaRepository<Board, Integer> {
             "WHERE b.board_category = :boardCategory",
             nativeQuery = true)
     List<Object[]> findByCategoryWithRowNumber(@Param("boardCategory") String boardCategory);
-    /* List<Object[]>는
-        [0]: boardCategory
-        [1]: categoryBoardNo (ROW_NUMBER로 생성된 카테고리별 글 번호)
-        [2]: boardNo (전체 고유 글 번호)
-        [3]: title
-        [4]: content
-        [5]: nickname
 
-     JPA 매핑 규칙
-     VARCHAR, TEXT -> String
-     INT -> Integer
-     ROW_NUMBER() -> Number
-    */
 }

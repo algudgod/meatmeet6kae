@@ -7,6 +7,7 @@ import com.meatmeet6kae.entity.board.Board;
 import com.meatmeet6kae.entity.user.User;
 import com.meatmeet6kae.service.board.BoardService;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -35,14 +36,12 @@ public class BoardController {
         User user = (User) session.getAttribute("user");
         model.addAttribute("user", user);
 
-        BoardDto boardDto = new BoardDto();
-        //(String -> Eunm으로 BoardCategory를 변환하여 categoryEnum에 담음.
         BoardCategory categoryEnum = boardService.getBoardCategoryEnum(boardCategory);
-        //boardDto의 boardCategory가 String이기때문에 Enum을 직접 대입할 수 없어 toString() 또는 name()을 사용하여 문자열로 변환.
+
+        BoardDto boardDto = new BoardDto();
         boardDto.setBoardCategory(categoryEnum.toString());
 
-        model.addAttribute("boardCategorys",boardService.getAllBoardCategorys()); // 전체 게시판 카테고리 목록
-        model.addAttribute("boardCategory",categoryEnum); // 사용자가 요청한 카테고리를 Enum으로 변환.
+        model.addAttribute("boardCategorys",boardService.getAllBoardCategorys());
         model.addAttribute("boardDto",boardDto);
         return "boards/addBoardForm";
     }
@@ -51,24 +50,19 @@ public class BoardController {
     public String getBoardList(@RequestParam("boardCategory")String boardCategory, HttpSession session, Model model){
 
         User user = (User)session.getAttribute("user");
-        // 디버깅
-        if (user != null) {
-            logger.debug("Logged-in user: {}", user.getLoginId());
-        } else {
-            logger.debug("No user found in session");
-        }
         model.addAttribute("user", user);
 
         logger.debug("boardCategory: {}", boardCategory);
+        model.addAttribute("boardCategory", boardCategory);
 
         List<Board> boards = boardService.getBoardsByCategory(boardCategory);
         model.addAttribute("boards", boards);
-        model.addAttribute(("boardCategory"), boardCategory);
+
         return "navigation/boardList";
     }
 
     @PostMapping("addBoard")
-    public String addBoard(BoardDto boardDto, BindingResult result, HttpSession session, Model model) {
+    public String addBoard(@Valid BoardDto boardDto, BindingResult result, HttpSession session, Model model) {
 
         // 1. 세션에서 로그인 된 사용자의 정보를 가져옴
         User user = (User) session.getAttribute("user");
@@ -79,6 +73,8 @@ public class BoardController {
         // 2. 입력된 데이터에 오류가 있는지 검증
         if (result.hasErrors()) {
             logger.debug("result error: {}", result.getAllErrors());
+            model.addAttribute("boardCategorys", boardService.getAllBoardCategorys());
+            model.addAttribute("user",user);
             model.addAttribute("error", "입력한 정보에 오류가 있습니다.");
             return "boards/addBoardForm";
         }
@@ -104,69 +100,95 @@ public class BoardController {
 
             // 조회수 증가
             boardService.updateViewCount(boardNo,user);
-
+            //게시글 정보 가져오기
             Board board = boardService.getBoardDefaultCategory(boardNo);
             model.addAttribute("board",board);
-
+            // 카테고리 정보 추가
             model.addAttribute("boardCategorys",boardService.getAllBoardCategorys());
             model.addAttribute("boardCategory", boardService.getBoardCategoryEnum(board.getBoardCategory()));
 
             return "boards/boardDetail";
-        }catch(IllegalArgumentException e){
+
+        }catch (IllegalArgumentException e){
             model.addAttribute("errorMessage",e.getMessage());
+
             return "errors/boardNullErrorPage";
-
         }
     }
 
-    //게시글 수정 폼을 보여주는 메서드
-    @GetMapping("editBoard/{boardNo}")
-    public String editBoard(@PathVariable int boardNo, HttpSession session, Model model){
-
-        User user = (User)session.getAttribute("user");
-        model.addAttribute("user",user);
-
-        // 예외: 사용자가 로그인 되지 않은 경우
+    // 게시글 수정 폼을 보여주는 메서드
+    @GetMapping("/editBoardForm/{boardNo}")
+    public String editBoardForm(@PathVariable int boardNo, HttpSession session, Model model) {
+        // 1. 사용자 세션 확인
+        User user = (User) session.getAttribute("user");
         if (user == null) {
-            return "redirect:/users/login";
+            return "redirect:/users/login"; // 로그인되지 않은 사용자는 로그인 페이지로 이동
         }
 
-        Board boards = boardService.getBoardByBoardNo(boardNo);
-
-        // 예외: 게시글이 없을 경우
-        if (boards == null) {
-            return "redirect:/boardList";
+        // 2. 게시글 조회
+        Board board = boardService.getBoardByBoardNo(boardNo);
+        if (board == null) {
+            return "redirect:/boardList"; // 게시글이 없으면 게시판 목록으로 이동
         }
 
-        // 예외: 작성자와 세션의 loginId가 일치하지 않는 경우
-        if (!user.getLoginId().equals(boards.getUser().getLoginId())) {
-            return "redirect:/boardList";
+        // 3. 작성자 확인
+        if (!user.getLoginId().equals(board.getUser().getLoginId())) {
+            return "redirect:/boardList"; // 작성자가 아니면 목록으로 이동
         }
 
-        model.addAttribute("boards",boards);
+        // 4. View에 데이터 전달
+        BoardDto boardDto = new BoardDto();
+        boardDto.setBoardNo(board.getBoardNo());
+        boardDto.setTitle(board.getTitle());
+        boardDto.setContent(board.getContent());
+        boardDto.setBoardCategory(board.getBoardCategory());
 
-        return "boards/editBoard";
+        String boardCategoryName = BoardCategory.valueOf(board.getBoardCategory()).getBoardCategoryName();
+        model.addAttribute("boardCategoryName", boardCategoryName); // 카테고리 이름 전달
+
+        model.addAttribute("board", boardDto);
+        model.addAttribute("boardCategory", boardService.getAllBoardCategorys());
+
+        return "boards/editBoardForm"; // 수정 폼 페이지
     }
 
-    //게시글 수정 메서드
-    @PostMapping("updateBoard")
-    public String updateBoard(@ModelAttribute BoardDto boardDto, HttpSession session, Model model){
-
-        User user = (User)session.getAttribute("user");
-        // 유효성 검사: 사용자가 로그인하지 않은 경우
+    // 게시글 수정 메서드
+    @PostMapping("/updateBoard")
+    public String updateBoard(@Valid @ModelAttribute BoardDto boardDto, BindingResult result, HttpSession session, Model model) {
+        // 1. 사용자 세션 확인
+        User user = (User) session.getAttribute("user");
         if (user == null) {
-            return "redirect:/users/login";
+            return "redirect:/users/login"; // 로그인되지 않은 사용자는 로그인 페이지로 이동
         }
 
-        Board boards = boardService.getBoardByBoardNo(boardDto.getBoardNo());
-        // 유효성 검사: 게시글이 없거나 작성자와 로그인한 사용자 비교
-        if(boards ==null || !user.getLoginId().equals(boards.getUser().getLoginId())){
-            return "redirect:/boardList";
+        // 2. 게시글 조회 및 작성자 확인
+        Board board = boardService.getBoardByBoardNo(boardDto.getBoardNo());
+        if (board == null || !user.getLoginId().equals(board.getUser().getLoginId())) {
+            return "redirect:/boardList"; // 게시글이 없거나 작성자가 아니면 목록으로 이동
         }
 
+        // 3. 유효성 검사
+        if (result.hasErrors()) {
+            logger.debug("result error: {}", result.getAllErrors());
+            System.out.println("vail failllllllllllllllll"+ boardDto.toString());
+            model.addAttribute("user", user); // 로그인 사용자 정보 유지
+            model.addAttribute("board", boardDto); // 유효성 검사가 실패하면 폼 데이터 유지
+            model.addAttribute("boardCategory", boardService.getAllBoardCategorys());
+            model.addAttribute("errors", result.getAllErrors()); // 에러를 모델에 추가
+
+            // 카테고리 이름을 다시 모델에 추가
+            String boardCategoryName = BoardCategory.valueOf(boardDto.getBoardCategory()).getBoardCategoryName();
+            model.addAttribute("boardCategoryName", boardCategoryName);
+
+            return "boards/editBoardForm"; // 수정 폼으로 다시 이동
+        }
+
+        // 4. 게시글 수정
+        System.out.println("updateBoard good: " + boardDto);
         boardService.updateBoard(boardDto);
-        // 수정 완료 후 , 게시글 상세조회 메서드 호출, boardNo으로 바인딩
-        return "redirect:/boards/"+boardDto.getBoardNo();
+
+        // 5. 수정 완료 후 상세보기 페이지로 이동
+        return "redirect:/boards/" + boardDto.getBoardNo();
     }
 
     //게시글 삭제 메서드

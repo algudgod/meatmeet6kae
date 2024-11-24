@@ -93,26 +93,19 @@ public class HomeController {
         // 선택된 카테고리는 String으로 넘어오기 때문에, valueOf로 Enum 변환(오류방지)
         BoardCategory category = BoardCategory.valueOf(boardCategory);
         model.addAttribute("category",category);
-/*
-        List<Board> boards = boardService.getBoardsByCategory(boardCategory);
-        // 새글
-        int todayBoardCount = 0; //오늘의 게시글 초기화
-        LocalDate today = LocalDate.now(); //오늘 날짜 가져오기
-        for(Board board: boards) { // 게시글 전체 목록
-            if (board.getCreateDate().toLocalDate().isEqual(today)) {
-                todayBoardCount++;
-            }
-        }*/
-        List<BoardDto> boardDtos = boardService.getBoardWithCategoryNumbers(boardCategory);
 
-        model.addAttribute("boards", boardDtos);
-        //model.addAttribute("boards", boards);
-        //model.addAttribute("boardCategory", boardCategory);
-        model.addAttribute("boardCategoryName",category.getBoardCategoryName());
-        model.addAttribute("boardDescription",category.getBoardDescription());
+        List<BoardDto> boardDtos = boardService.getBoardWithCategoryNumbers(boardCategory);
+        model.addAttribute("boardDtos", boardDtos);
+        // 게시글 목록 가져오기 (Board 엔티티로 직접 가져오기,  조회수)
+        List<Board> boards = boardService.getBoardsByCategory(boardCategory); // DB에서 최신 정보로 가져옴
+        model.addAttribute("boards", boards);
+        int todayBoardCount = boardService.countTodayBoardByCategory(boardCategory);
+        model.addAttribute("todayBoardCount",todayBoardCount);
+        int totalBoardCount = boardDtos.size();
+        model.addAttribute("totalBoardCount",totalBoardCount);
+
         model.addAttribute("page","boardList");
-/*        model.addAttribute("todayBoardCount",todayBoardCount);
-        model.addAttribute("totalBoardCount",boards.size());*/
+
         return "navigation/boardList";
     }
 

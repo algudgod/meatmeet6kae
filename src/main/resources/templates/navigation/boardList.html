@@ -37,11 +37,11 @@
             <!-- 오른쪽 게시판 내용 -->
             <div class="col-md-10">
                 <!-- 게시판 제목 -->
-                <h2 class="board-categorytitle" style="font-size: 20px;" th:text="${boardCategoryName}"></h2>
+                <h2 class="board-categorytitle" style="font-size: 20px;" th:text="${category.boardCategoryName}"></h2>
 
-                <!-- 게시판 부가 설명
-                <p class="board-description" style="font-size: 15px; color: #888;" th:text="${boardDescription}"></p>
-                <p class="board-description" style="font-size: 13px;"> 새글 <span th:text="${todayBoardCount} + ' / ' + ${totalBoardCount}"></span></p>-->
+                <!-- 게시판 부가 설명 -->
+                <p class="board-description" style="font-size: 15px; color: #888;" th:text="${category.boardDescription}"></p>
+                <p class="board-description" style="font-size: 13px;"> 새글 <span th:text="${todayBoardCount} + ' / ' + ${totalBoardCount}"></span></p>
 
                 <!-- 구분선 -->
                 <div class="d-flex justify-content-center mb-2">
@@ -59,18 +59,19 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="board : ${boards}">
-                        <td th:text="${board.categoryBoardNo}">1</td>
+                    <tr th:each="boardDto, iterStat : ${boardDtos}">
+                        <!-- 다른 데이터는 DTO에서 가져옴 -->
+                        <td th:text="${boardDto.categoryBoardNo}">1</td>
                         <td class="text-start">
-                            <a th:href="@{/boards/{boardNo}(boardNo=${board.boardNo})}"
-                               th:text="${board.title}"
+                            <a th:href="@{/boards/{boardNo}(boardNo=${boardDto.boardNo})}"
+                               th:text="${boardDto.title}"
                                class="board-title" style="font-size:15px;"> 제목 </a>
                         </td>
-                        <td th:text="${board.nickname}">닉네임</td>
-                        <td th:text="${board.createDate.toLocalDate().isEqual(T(java.time.LocalDate).now())
-                                    ? #temporals.format(board.createDate, 'HH:mm')
-                                    : #temporals.format(board.createDate, 'yy.MM.dd')}"></td>
-                        <td th:text="${board.viewCount}">조회수</td>
+                        <td th:text="${boardDto.nickname}">닉네임</td>
+                        <td th:text="${#temporals.format(boardDto.createDate, 'yy.MM.dd')}"></td>
+
+                        <!-- 조회수는 boards 리스트에서 가져오기 -->
+                        <td th:text="${boards[iterStat.index].viewCount}">조회수</td>
                     </tr>
                     </tbody>
                 </table>

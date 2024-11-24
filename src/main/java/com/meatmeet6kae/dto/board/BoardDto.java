@@ -12,11 +12,11 @@ public class BoardDto {
     private int boardNo;
 
     @NotBlank(message = "제목은 필수 입력 항목입니다.")
-    @Size(max = 100, message = "100자를 초과하여 등록할 수 없습니다.")
+    @Size(min=3, max = 100, message = "3자 이상, 100자이하로 입력해주세요.")
     private String title;
 
-    @NotBlank(message = "내용은 필수 입력 항목입니다.")
-    @Size(min=5)
+    @NotBlank(message = "내용은 필수 항목입니다.")
+    @Size(min = 5, max = 2000, message = "내용은 10자 이상, 2000자 이하로 입력해주세요.")
     private String content;
 
     @NotBlank
@@ -96,4 +96,17 @@ public class BoardDto {
         this.boardCategory = boardCategory;
     }
 
+    @Override
+    public String toString() {
+        return "BoardDto{" +
+                "boardNo=" + boardNo +
+                ", title='" + title + '\'' +
+                ", content='" + content + '\'' +
+                ", boardCategory='" + boardCategory + '\'' +
+                ", nickname='" + nickname + '\'' +
+                ", categoryBoardNo=" + categoryBoardNo +
+                ", viewCount=" + viewCount +
+                ", createDate=" + createDate +
+                '}';
+    }
 }

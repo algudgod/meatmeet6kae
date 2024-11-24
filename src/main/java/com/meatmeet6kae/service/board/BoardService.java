@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,15 +51,20 @@ public class BoardService {
     }
 
     // 게시글 수정
+    @Transactional
     public Board updateBoard(BoardDto boardDto) {
 
-        Board boards = getBoardByBoardNo(boardDto.getBoardNo());
+        Board board = getBoardByBoardNo(boardDto.getBoardNo());
+        // String -> Enum 변환
+        BoardCategory category = getBoardCategoryEnum(boardDto.getBoardCategory());
+        System.out.println("변환된 카테고리: " + category);
 
         // 게시글 수정 내용
-        boards.setTitle(boardDto.getTitle());
-        boards.setContent(boardDto.getContent());
-        boards.setUpdateDate(LocalDateTime.now());
-        return boardRepository.save(boards);
+        board.setBoardCategory(category.name()); // Enum의 이름(String)으로 설정
+        board.setTitle(boardDto.getTitle());
+        board.setContent(boardDto.getContent());
+        board.setUpdateDate(LocalDateTime.now());
+        return boardRepository.save(board);
     }
 
     //게시글 삭제
@@ -66,9 +72,8 @@ public class BoardService {
 
         Board board = getBoardByBoardNo(boardNo);
 
-        // 작성자와 로그인 사용자 검증
-        if (!board.getUser().getLoginId().equals(user.getLoginId())){
-            return;
+        if (!isBoardOwner(board, user)) {
+            throw new IllegalArgumentException("작성자가 아니므로 삭제할 수 없습니다.");
         }
         boardRepository.delete(board);
     }
@@ -79,12 +84,19 @@ public class BoardService {
 
         Board board = getBoardByBoardNo(boardNo);
 
-        if(user != null && !board.getUser().getLoginId().equals(user.getLoginId())){
+        if(user != null && !isBoardOwner(board,user)){
         board.setViewCount(board.getViewCount()+1);
+        boardRepository.save(board);
+
         }
     }
 
-    // 게시글 카테고리를 기본값 FREE로 설정
+    // 게시글 작성자와 로그인 사용자 검증
+    public boolean isBoardOwner(Board board, User user){
+        return board.getUser().getLoginId().equals(user.getLoginId());
+    }
+
+    // 특정 게시글 카테고리를 확인 후, 없다면 기본값 FREE로 설정(이미 존재하는 게시글에 적합)
     public Board getBoardDefaultCategory(int boardNo){
 
         Board board = getBoardByBoardNo(boardNo);
@@ -102,7 +114,10 @@ public class BoardService {
 
     // BoardCategory 변환 (String -> Enum)
     public BoardCategory getBoardCategoryEnum(String boardCategory) {
-        return BoardCategory.valueOf(boardCategory);
+        if (boardCategory == null || boardCategory.trim().isEmpty()) {
+            throw new IllegalArgumentException("카테고리 값이 비어 있습니다.");
+        }
+        return BoardCategory.valueOf(boardCategory.toUpperCase());
     }
 
     // 특정 키테고리의 게시글 목록을 카테고리별 고유 번호와 함께 반환
@@ -127,5 +142,20 @@ public class BoardService {
         return boards;
     }
 
+    // 오늘 날짜 새로운 게시글 수 계산
+    public int countTodayBoardByCategory(String boardCategory){
+
+        List<Board> boards = boardRepository.findByBoardCategoryOrderByBoardNoDesc(boardCategory);
+
+        int todayBoardCount = 0;
+        LocalDate today = LocalDate.now();
+
+        for(Board board: boards){
+            if(board.getCreateDate().toLocalDate().isEqual(today)){
+                todayBoardCount++;
+            }
+        }
+        return todayBoardCount;
+    }
 
 }

@@ -22,12 +22,12 @@
             <!-- 목록, 수정, 삭제 버튼 -->
             <div class="d-flex justify-content-between align-items-center mt-3 mb-4">
                 <!-- 목록(왼쪽 정렬) -->
-                <a th:href="@{/boardList}" class="btn btn-sm btn-outline-secondary" style="font-size: 14px;">목록</a>
+                <a th:href="@{/boardList(boardCategory=${boardCategory})}" class="btn btn-sm btn-outline-secondary" style="font-size: 14px;">목록</a>
                 <!-- 수정 및 삭제 버튼(오른쪽 정렬) -->
                 <div class="d-flex align-items-center">
                     <!-- 수정  -->
                     <a th:if="${user != null and user.loginId == board.user.loginId}"
-                       th:href="@{/boards/editBoard/{boardNo}(boardNo=${board.boardNo})}"
+                       th:href="@{/boards/editBoardForm/{boardNo}(boardNo=${board.boardNo})}"
                        class="btn btn-sm btn-outline-secondary" style="font-size: 14px; margin-right: 5px;">수정</a>
 
                     <!-- 삭제: POST방식을 위해 a 태그에서 독립적인 form으로 변경 -->
@@ -71,7 +71,7 @@
             <!-- 목록, 수정, 삭제 버튼 -->
             <div class="d-flex justify-content-between align-items-center mt-3 mb-4">
                 <!-- 목록(왼쪽 정렬) -->
-                <a th:href="@{/boardList}" class="btn btn-sm btn-outline-secondary" style="font-size: 14px;">목록</a>
+                <a th:href="@{/boardList(boardCategory=${boardCategory})}" class="btn btn-sm btn-outline-secondary" style="font-size: 14px;">목록</a>
                 <!-- 수정 및 삭제 버튼(오른쪽 정렬) -->
                 <div class="d-flex align-items-center">
                     <!-- 수정  -->

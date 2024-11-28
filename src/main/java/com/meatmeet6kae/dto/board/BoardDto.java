@@ -16,10 +16,10 @@ public class BoardDto {
     private String title;
 
     @NotBlank(message = "내용은 필수 항목입니다.")
-    @Size(min = 5, max = 2000, message = "내용은 10자 이상, 2000자 이하로 입력해주세요.")
+    @Size(min = 5, max = 2000, message = "내용은 5자 이상, 2000자 이하로 입력해주세요.")
     private String content;
 
-    @NotBlank
+    @NotBlank(message = "카테고리는 필수 항목입니다.")
     private String boardCategory;
 
     private String nickname; // 작성자 닉네임 추가

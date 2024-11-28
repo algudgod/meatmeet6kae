@@ -60,7 +60,7 @@
                     </thead>
                     <tbody>
                     <tr th:each="boardDto, iterStat : ${boardDtos}">
-                        <!-- 다른 데이터는 DTO에서 가져옴 -->
+                        <!-- 조회수 제외 나머지 데이터는 DTO에서 가져옴 -->
                         <td th:text="${boardDto.categoryBoardNo}">1</td>
                         <td class="text-start">
                             <a th:href="@{/boards/{boardNo}(boardNo=${boardDto.boardNo})}"
@@ -68,8 +68,9 @@
                                class="board-title" style="font-size:15px;"> 제목 </a>
                         </td>
                         <td th:text="${boardDto.nickname}">닉네임</td>
-                        <td th:text="${#temporals.format(boardDto.createDate, 'yy.MM.dd')}"></td>
-
+                        <td th:text="${boardDto.createDate.toLocalDate().isEqual(T(java.time.LocalDate).now())
+                                ? #temporals.format(boardDto.createDate, 'HH:mm')
+                                : #temporals.format(boardDto.createDate, 'yy.MM.dd')}"></td>
                         <!-- 조회수는 boards 리스트에서 가져오기 -->
                         <td th:text="${boards[iterStat.index].viewCount}">조회수</td>
                     </tr>

@@ -34,6 +34,9 @@ public class BoardController {
     public String addBoardForm(@RequestParam("boardCategory")String boardCategory, HttpSession session, Model model) {
 
         User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/users/login"; // 로그인되지 않은 사용자는 로그인 페이지로 이동
+        }
         model.addAttribute("user", user);
 
         BoardCategory categoryEnum = boardService.getBoardCategoryEnum(boardCategory);
@@ -170,7 +173,7 @@ public class BoardController {
         // 3. 유효성 검사
         if (result.hasErrors()) {
             logger.debug("result error: {}", result.getAllErrors());
-            System.out.println("vail failllllllllllllllll"+ boardDto.toString());
+            System.out.println("vail fail: "+ boardDto.toString());
             model.addAttribute("user", user); // 로그인 사용자 정보 유지
             model.addAttribute("board", boardDto); // 유효성 검사가 실패하면 폼 데이터 유지
             model.addAttribute("boardCategory", boardService.getAllBoardCategorys());

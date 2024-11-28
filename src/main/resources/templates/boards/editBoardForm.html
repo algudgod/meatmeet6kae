@@ -22,10 +22,10 @@
                 <input type="hidden" th:field="*{boardNo}" />
                 <!-- 카테고리 선택 -->
                 <div class="mb-3">
-                    <label for="boardCategory" class="form-label">카테고리</label>
+                    <label for="boardCategory" class="form-label">게시판</label>
                     <div class="dropdown">
                         <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                            <span id="selectedCategory" th:text="${boardCategoryName != null ? boardCategoryName : '카테고리 선택'}">카테고리 선택</span>
+                            <span id="selectedCategory" th:text="${boardCategoryName != null ? boardCategoryName : '게시판 선택'}">게시판 선택</span>
                         </button>
                         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                             <th:block th:each="category : ${boardCategory}">
@@ -71,13 +71,13 @@
 
 <script>
     function selectCategory(element) {
-    const selectedCategory = element.getAttribute("data-value"); // 선택된 값
-    const selectedText = element.innerText; // 선택된 카테고리 이름
-    // 드롭다운 버튼 텍스트 변경
-    document.getElementById("selectedCategory").textContent = selectedText;
-    // 숨겨진 필드 값 설정
-    document.getElementById("boardCategory").value = selectedCategory;
-    }
+        const selectedCategory = element.getAttribute("data-value"); // 선택된 값
+        const selectedText = element.innerText; // 선택된 카테고리 이름
+        // 드롭다운 버튼 텍스트 변경
+        document.getElementById("selectedCategory").textContent = selectedText;
+        // 숨겨진 필드 값 설정
+        document.getElementById("boardCategory").value = selectedCategory;
+        }
 
 </script>
 

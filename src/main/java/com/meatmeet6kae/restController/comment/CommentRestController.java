@@ -42,4 +42,28 @@ public class CommentRestController {
         return ResponseEntity.ok(commentDtos);
     }
 
+    @PutMapping("/updateComment/{commentNo}")
+    public ResponseEntity<CommentDto> updateComment(@PathVariable int commentNo, @RequestBody CommentDto commentDto, HttpSession session){
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            throw new IllegalArgumentException("로그인이 필요합니다.");
+        }
+        CommentDto updatedComment = commentService.updateComment(commentDto, user);
+
+        return ResponseEntity.ok(updatedComment);
+
+    }
+
+    @DeleteMapping("/deleteComment/{commentNo}")
+    public ResponseEntity<String> deleteComment(@PathVariable int commentNo, HttpSession session){
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            throw new IllegalArgumentException("로그인이 필요합니다.");
+        }
+        commentService.deleteComment(commentNo, user);
+
+        return ResponseEntity.ok("삭제되었습니다.");
+    }
+
+
 }

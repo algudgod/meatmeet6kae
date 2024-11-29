@@ -69,4 +69,50 @@ public class CommentService {
     }
 
 
+    // 댓글 수정
+    public CommentDto updateComment(CommentDto commentDto, User user){
+
+        // 1. 유효성 검증
+        // 1-1. 댓글 번호로 특정 댓글을 조회하고 null check
+        Comment comment = commentRepository.findById(commentDto.getCommentNo())
+                .orElseThrow(() -> new IllegalArgumentException("댓글이 존재하지 않습니다."));
+
+        // 1-2 댓글의 작성자와 수정자의 검증
+        if(!comment.getUser().getLoginId().equals(user.getLoginId())) {
+            throw new IllegalArgumentException("작성자가 아니므로 수정할 수 없습니다.");
+        }
+
+        // 댓글 내용 수정, updateDate 기록
+        comment.setContent(commentDto.getContent());
+        comment.setUpdateDate(LocalDateTime.now());
+
+        // 수정된 댓글 내용 저장
+        Comment updatedComment = commentRepository.save(comment);
+
+        // 엔티티를 Dto로 변환하여 반환
+        CommentDto updatedCommentDto = new CommentDto();
+        updatedCommentDto.setCommentNo(updatedComment.getCommentNo());
+        updatedCommentDto.setContent(updatedComment.getContent());
+        updatedCommentDto.setBoardNo(updatedCommentDto.getBoardNo());
+        updatedCommentDto.setNickname(updatedCommentDto.getNickname());
+        updatedCommentDto.setUpdateDate(updatedComment.getUpdateDate());
+
+        return updatedCommentDto;
+    }
+
+    // 댓글 삭제
+    public void deleteComment(int commentNo, User user){
+    // 1. 유효성 검증
+    // 1-1. 댓글 번호로 특정 댓글을 조회하고 null check
+        Comment comment = commentRepository.findById(commentNo)
+                .orElseThrow(() -> new IllegalArgumentException("댓글이 존재하지 않습니다."));
+        // 1-2 댓글의 작성자와 수정자의 검증
+        if(!comment.getUser().getLoginId().equals(user.getLoginId())){
+            throw new IllegalArgumentException("작성자가 아니므로 삭제할 수 없습니다.");
+        }
+
+        commentRepository.delete(comment);
+
+    }
+
 }

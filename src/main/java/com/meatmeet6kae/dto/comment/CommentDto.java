@@ -16,7 +16,8 @@ public class CommentDto {
     private String content;
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime createDate;
-
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
+    private LocalDateTime updateDate;
 
     public int getCommentNo() {
         return commentNo;
@@ -57,6 +58,15 @@ public class CommentDto {
     public void setCreateDate(LocalDateTime createDate) {
         this.createDate = createDate;
     }
+
+    public LocalDateTime getUpdateDate() {
+        return updateDate;
+    }
+
+    public void setUpdateDate(LocalDateTime updateDate) {
+        this.updateDate = updateDate;
+    }
+
 
     @Override
     public String toString() {

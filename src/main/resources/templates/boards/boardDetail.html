@@ -31,6 +31,39 @@
                 margin: 0; /* 기본 여백 제거 */
             }
 
+            /* Flexbox를 사용하여 한 줄에 배치 */
+            .comment-content-row {
+                display: flex;
+                justify-content: space-between; /* 내용과 버튼 그룹 간격 조정 */
+                align-items: center; /* 세로 가운데 정렬 */
+            }
+
+            .comment-content {
+                margin: 0; /* 기본 여백 제거 */
+                flex: 1; /* 버튼 제외하고 나머지 공간 차지 */
+            }
+
+            .comment-actions {
+                display: flex;
+                gap: 10px; /* 버튼 간격 */
+            }
+
+            .form-control {
+            border: 1px solid #ccc; /* 기본 테두리 색 */
+            border-radius: 4px; /* 모서리 둥글게 */
+            outline: none; /* 기본 outline 제거 */
+            }
+
+            /* textarea 포커스 상태 */
+            .form-control:focus {
+                border: 1px solid #333; /* 테두리를 얇은 검정으로 설정 */
+                box-shadow: none; /* 파란색 그림자 제거 */
+            }
+            .comment-actions .btn-sm {
+            padding: 2px 6px; /* 패딩 줄이기 */
+            font-size: 12px; /* 글자 크기 줄이기 */
+        }
+
         </style>
     </head>
 
@@ -99,21 +132,43 @@
                     </h5>
                     <!-- 댓글 영역 -->
                     <div id="comment-section">
+
                         <div class="comment-list mt-3">
-                            <!-- 서버에서 가져온 댓글이 추가될 곳 -->
+                            <div id="comment-template" style="display: none;">
+                                <div class="comment-item">
+
+                                    <div class="comment-header">
+                                        <p><strong class="comment-nickname"></strong>
+                                            <span class="comment-date" style="font-size: 0.85rem; color: #666;"></span>
+                                        </p>
+                                    </div>
+
+                                    <div class="comment-body">
+                                        <div class="comment-content-row">
+                                            <p class="comment-content"></p>
+                                            <div class="comment-actions">
+                                                <button class="btn btn-sm btn-outline-secondary comment-edit-btn">수정</button>
+                                                <button class="btn btn-sm btn-outline-danger comment-delete-btn">삭제</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
                         </div>
+
                         <form id="commentForm" onsubmit="addComment(event)">
                             <div class="form-group">
-                                <textarea
-                                        id="comment-content"
-                                        class="form-control"
-                                        name="content"
-                                        rows="4"
-                                        maxlength="300"
-                                        th:placeholder="${user == null} ? '로그인 후 작성할 수 있습니다.' : '댓글을 입력하세요'"
-                                        th:disabled="${user == null}"
-                                        required
-                                ></textarea>
+                                    <textarea
+                                            id="comment-content"
+                                            class="form-control"
+                                            name="content"
+                                            rows="4"
+                                            maxlength="300"
+                                            th:placeholder="${user == null} ? '로그인 후 작성할 수 있습니다.' : '댓글을 입력하세요'"
+                                            th:disabled="${user == null}"
+                                            required
+                                    ></textarea>
                                 <div style="text-align: right; font-size: 13px;">
                                     <span id="char-count">0</span>/300
                                 </div>
@@ -125,6 +180,7 @@
                     </div>
                 </div>
                 <input type="hidden" id="boardNo" th:value="${board.boardNo}" />
+                <input type="hidden" id="loggedInUserNickname" th:value="${user != null ? user.nickname : ''}">
 
                 <!-- 구분선 -->
                 <hr style="border: 1px solid #888; margin-bottom: 1rem;">
@@ -162,7 +218,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-
         function addComment(event) {
             event.preventDefault(); // 폼의 기본 동작 방지
 
@@ -208,38 +263,36 @@
                 });
         }
 
-        // 댓글 리스트 업데이트(새 댓글 추가)
+        // 댓글 리스트 업데이트(등록한 댓글이 추가됨을 보여주는 것)
         function updateCommentList(data) {
             console.log("서버 응답 데이터:", data); // 데이터 확인
 
             const commentList = document.querySelector(".comment-list");
-            const newComment = document.createElement("div");
-            newComment.className = "comment-item";
+            const template = document.querySelector("#comment-template"); // 템플릿 가져오기
+            const newComment = template.cloneNode(true); // 템플릿 복사
 
-            // 날짜 포맷
-            const commentDate = new Date(data.createDate);
-            const now = new Date();
-            const isToday = commentDate.toDateString() === now.toDateString();
-            const formattedDate = isToday
-                ? commentDate.toTimeString().slice(0, 5) // HH:mm
-                : commentDate.toISOString().slice(2, 10).replace(/-/g, '.'); // yy.MM.dd
+            newComment.style.display = "block"; // 숨겨진 템플릿 표시
+            newComment.querySelector(".comment-nickname").textContent = data.nickname || "익명"; // 닉네임
+            newComment.querySelector(".comment-date").textContent = formatDate(data.createDate); // 날짜 포맷
+            newComment.querySelector(".comment-content").textContent = data.content || ""; // 댓글 내용
 
-            newComment.innerHTML = `
-                <div class="comment-header">
-                    <p><strong>${data.nickname}</strong>
-                       <span style="font-size: 0.85rem; color: #666;">${formattedDate}</span></p>
-                </div>
-                <div class="comment-body">
-                    <p>${data.content}</p>
-                </div>
-            `;
-            commentList.appendChild(newComment); // 화면에 새 댓글 추가
+            // 수정/삭제 버튼 추가
+            const loggedInUserNickname = document.getElementById("loggedInUserNickname").value;
+            if (data.nickname === loggedInUserNickname) {
+                newComment.querySelector(".comment-edit-btn").onclick = () => updateComment(data.commentNo);
+                newComment.querySelector(".comment-delete-btn").onclick = () => deleteComment(data.commentNo);
+            } else {
+                // 작성자가 아닌 경우 수정/삭제 버튼 제거
+                newComment.querySelector(".comment-actions").remove();
+            }
+
+            commentList.appendChild(newComment); // 댓글 리스트에 새 댓글 추가
         }
 
         // 입력창 초기화
         function clearCommentInput() {
             document.querySelector("textarea[name='content']").value = ""; // 입력창 내용 초기화
-        document.getElementById("char-count").textContent = "0"; // 글자 수 초기화
+            document.getElementById("char-count").textContent = "0"; // 글자 수 초기화
 
         }
 
@@ -266,35 +319,44 @@
             });
         }
 
-        // 댓글 목록을 화면에 렌더링
+        // 댓글을 화면에 추가하는 함수
         function renderComments(comments) {
-            const commentList = document.querySelector(".comment-list");
-            commentList.innerHTML = ""; // 기존 댓글 목록 초기화
+            const commentList = document.querySelector(".comment-list"); // 댓글 리스트 영역
+            const template = document.querySelector("#comment-template"); // 템플릿 가져오기
 
-            // 서버에서 가져온 댓글 데이터를 반복하면서 화면에 추가
+            commentList.innerHTML = ""; // 기존 댓글 초기화
+
             comments.forEach(comment => {
-                const commentItem = document.createElement("div");
-                commentItem.className = "comment-item";
+                const clone = template.cloneNode(true); // 템플릿 복사
+                clone.style.display = "block"; // 숨김 해제
 
-                // 날짜 포맷
-                const commentDate = new Date(comment.createDate);
-                const now = new Date();
-                const isToday = commentDate.toDateString() === now.toDateString();
-                const formattedDate = isToday
-                    ? commentDate.toTimeString().slice(0, 5) // HH:mm
-                    : commentDate.toISOString().slice(2, 10).replace(/-/g, '.'); // yy.MM.dd
+                // 데이터 채우기
+                clone.querySelector(".comment-nickname").textContent = comment.nickname;
+                clone.querySelector(".comment-date").textContent = formatDate(comment.createDate);
+                clone.querySelector(".comment-content").textContent = comment.content;
 
-                commentItem.innerHTML = `
-                    <div class="comment-header">
-                        <p><strong>${comment.nickname}</strong>
-                           <span style="font-size: 0.85rem; color: #666;">${formattedDate}</span></p>
-                    </div>
-                    <div class="comment-body">
-                        <p>${comment.content}</p>
-                    </div>
-                `;
-                commentList.appendChild(commentItem);
+                // 본인 댓글만 수정/삭제 버튼 보이기
+                if (comment.nickname === document.getElementById("loggedInUserNickname").value) {
+                    clone.querySelector(".comment-edit-btn").onclick = () => updateComment(comment.commentNo);
+                    clone.querySelector(".comment-delete-btn").onclick = () => deleteComment(comment.commentNo);
+                } else {
+                    clone.querySelector(".comment-actions").remove(); // 작성자가 아니면 버튼 제거
+                }
+                commentList.appendChild(clone); // 댓글 리스트에 추가
             });
+        }
+        // 날짜 포맷 함수
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const isToday = date.toDateString() === now.toDateString();
+
+            if (isToday) {
+                // 오늘인 경우 HH:mm
+                return date.toTimeString().slice(0, 5);
+            }
+            // 오늘이 아닌 경우 yy.MM.dd
+            return date.toISOString().slice(2, 10).replace(/-/g, ".");
         }
 
         // 페이지 로드 시 댓글 목록 자동 로드 및 댓글 열고 닫기 로직 추가
@@ -320,7 +382,6 @@
             });
         });
 
-
         // 글자 수 카운트 함수
         document.getElementById("comment-content").addEventListener("input", function () {
             const textarea = this;
@@ -335,6 +396,7 @@
                 alert("300자를 초과할 수 없습니다!");
             }
         });
+
     </script>
 
     </body>

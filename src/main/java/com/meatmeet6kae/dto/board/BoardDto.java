@@ -31,6 +31,8 @@ public class BoardDto {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime createDate;
 
+    private int commentCount; // 댓글 수 필드 추가
+
 
     public LocalDateTime getCreateDate() {
         return createDate;
@@ -94,6 +96,14 @@ public class BoardDto {
 
     public void setBoardCategory(String boardCategory) {
         this.boardCategory = boardCategory;
+    }
+
+    public int getCommentCount() {
+        return commentCount;
+    }
+
+    public void setCommentCount(int commentCount) {
+        this.commentCount = commentCount;
     }
 
     @Override

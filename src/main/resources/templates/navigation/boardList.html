@@ -66,6 +66,7 @@
                             <a th:href="@{/boards/{boardNo}(boardNo=${boardDto.boardNo})}"
                                th:text="${boardDto.title}"
                                class="board-title" style="font-size:15px;"> 제목 </a>
+                            <a style="font-size: 12px; color: red; font-weight: bold;" th:text="${boardDto.commentCount}"></a>
                         </td>
                         <td th:text="${boardDto.nickname}">닉네임</td>
                         <td th:text="${boardDto.createDate.toLocalDate().isEqual(T(java.time.LocalDate).now())
@@ -79,7 +80,7 @@
 
                 <!-- 글쓰기 버튼 -->
                 <div class="d-flex justify-content-end mt-3">
-                    <a th:if="${user != null}"
+                    <a th:if="${user != null and (category.name() != 'NOTICE' or userRole == 'ADMIN')}"
                        th:href="@{/boards/addBoardForm(boardCategory=${category.name()})}" class="btn btn-dark" style="width: 100px;">글쓰기</a>
                 </div>
             </div>

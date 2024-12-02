@@ -77,6 +77,12 @@ public class HomeController {
         User user = (User)session.getAttribute("user");
         model.addAttribute("user",user);
 
+        if (user != null) {
+            String userRole = user.getRole();
+            System.out.println("User Role: " + userRole);
+            model.addAttribute("userRole", userRole);
+        }
+
         // 모든 열거형(ENUM 반환)
         BoardCategory[] boardCategories = BoardCategory.values();
         System.out.println("boardCategories"+boardCategories);

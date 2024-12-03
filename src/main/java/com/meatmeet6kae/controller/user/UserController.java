@@ -166,24 +166,21 @@ public class UserController {
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         // 현재 로그인된 사용자 정보 확인
-        User currentUser = (User) session.getAttribute("user");
+        User user = (User) session.getAttribute("user");
 
         // 로그아웃 전 사용자 정보를 로그로 찍어보기.
-        if (currentUser != null) {
-            logger.debug("User [{}] is logging out.", currentUser.getLoginId());
+        if (user != null) {
+            logger.debug("User [{}] is logging out.", user.getLoginId());
         } else {
             logger.debug("Not found user");
         }
-
-        // 세션 무효화 (로그아웃 처리)
-        session.invalidate();
-        // 로그아웃 후 세션 무효화 로그
+        session.invalidate();         // 세션 무효화 (로그아웃 처리)
         logger.debug("Session invalidated. logout.");
 
         return "redirect:/";  // 로그아웃 후 홈 페이지로 리다이렉트
     }
 
-    //내 정보 보기 폼을 보여주는 메서드
+    // 내 정보 보기 폼을 보여주는 메서드
     @GetMapping("/showUserInfo")
     public String showUserInfo(HttpSession session, Model model, HttpServletRequest request) {
 
@@ -209,36 +206,38 @@ public class UserController {
 
     // 내 정보 수정
     @PostMapping("/updateUser")
-    public String updateUser(@ModelAttribute User updatedUser, HttpSession session, Model model) {
-        User currentUser = (User) session.getAttribute("user");
-
-        // 폼에서 받아온 데이터 로그 확인 (loginId)
-        logger.debug("폼에서 받은 데이터 - loginId: {}", updatedUser.getLoginId());
-
-        if (currentUser == null) {
+    public String updateUser(@ModelAttribute User updatedUser,
+                             @RequestParam Map<String, String> params, HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
             logger.warn("현재 세션에 사용자가 존재하지 않습니다.");
             return "redirect:/users/login";
         }
         // 폼에서 받아온 데이터를 로그로 출력
-        logger.debug("updatedUser.getName()", updatedUser.getName());
-        logger.debug("updatedUser.getAddr()", updatedUser.getAddr());
-        logger.debug("updatedUser.getGender()", updatedUser.getGender());
-        logger.debug("updatedUser.getEmail()", updatedUser.getEmail());
-        logger.debug("updatedUser.getLoginId()", updatedUser.getLoginId());
+        logger.debug("Updated User Name: {}", updatedUser.getName());
+        logger.debug("Updated User Addr: {}", updatedUser.getAddr());
+        logger.debug("Updated User Gender: {}", updatedUser.getGender());
+        logger.debug("Updated User Email: {}", updatedUser.getEmail());
+        logger.debug("Updated User LoginId: {}", updatedUser.getLoginId());
 
         // 사용자 정보를 업데이트
-        currentUser.setName(updatedUser.getName());
-        currentUser.setGender(updatedUser.getGender());
-        currentUser.setAddr(updatedUser.getAddr());
-        currentUser.setEmail(updatedUser.getEmail());
-        currentUser.setEmailYn(updatedUser.getEmailYn());
+        user.setName(updatedUser.getName());
+        user.setGender(updatedUser.getGender());
+        user.setAddr(updatedUser.getAddr());
+        user.setEmail(updatedUser.getEmail());
+        user.setEmailYn(updatedUser.getEmailYn());
+
+        // `params`로 받은 추가 데이터 처리
+        String postcode = params.get("postcode");
+        String addrDetail = params.get("addrDetail");
+        String addrExtraAddress = params.get("addrExtraAddress");
 
         // DB에 업데이트
-        User updated = userService.updateUser(currentUser);
+        User updated = userService.updateUser(user);
 
         // 세션에 변경된 사용자 정보 반영
         session.setAttribute("user", updated);
-        logger.debug("updated", session.getAttribute("user"));
+        logger.debug("updated user:: ", session.getAttribute("user"));
 
         return "redirect:/users/showUserInfo";
     }
@@ -251,10 +250,7 @@ public class UserController {
         if (currentUser == null) {
             return "redirect:/users/login";
         }
-/*      서비스로 로직 이동
-        // 탈퇴 처리: useYn을 'N'으로 설정
-        currentUser.setUseYn("N");
-        userService.updateUser(currentUser); // DB에 업데이트*/
+
         userService.deactivateUser(currentUser.getLoginId());
 
         // 세션에서 사용자 정보 제거 (로그아웃 처리)
@@ -278,12 +274,11 @@ public class UserController {
     }
 
 
-    //ID찾기 폼을 보여주는 메서드
+
+    // ID찾기 폼을 보여주는 메서드
     @GetMapping("/findUserIdForm")
     public String findUserIdForm() {
         return "users/findUserId";
     }
-
-
 
 }

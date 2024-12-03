@@ -5,6 +5,7 @@ import com.meatmeet6kae.dto.board.BoardDto;
 import com.meatmeet6kae.entity.board.Board;
 import com.meatmeet6kae.entity.user.User;
 import com.meatmeet6kae.repository.board.BoardRepository;
+import com.meatmeet6kae.repository.comment.CommentRepository;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,8 +25,10 @@ public class BoardService {
     private static final Logger logger = LoggerFactory.getLogger(BoardService.class);
 
     private final BoardRepository boardRepository;
-    public BoardService(BoardRepository boardRepository) {
+    private final CommentRepository commentRepository;
+    public BoardService(BoardRepository boardRepository, CommentRepository commentRepository) {
         this.boardRepository = boardRepository;
+        this.commentRepository = commentRepository;
     }
 
     // 특정 카테고리의 게시글을 내림차순으로 조회
@@ -135,6 +138,10 @@ public class BoardService {
                 boardDto.setContent((String) row[4]);
                 boardDto.setNickname((String) row[5]);
                 boardDto.setCreateDate(((Timestamp) row[6]).toLocalDateTime());
+
+                // 댓글 수를 추가
+                int commentCount = commentRepository.countByBoardBoardNo(boardDto.getBoardNo());
+                boardDto.setCommentCount(commentCount);
 
                 boards.add(boardDto);
             }

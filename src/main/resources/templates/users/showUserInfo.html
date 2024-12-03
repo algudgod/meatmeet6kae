@@ -19,10 +19,9 @@
 
 
         <!-- 내 정보 내용 -->
-        <div class="col-md-8">
+        <div class="col-md-6">
             <!-- 제목 -->
-            <h2 class="text-center" style="font-size: 24px;">내 정보</h2>
-
+            <h2 class="text-center mb-1" >내 정보</h2>
 
             <!-- 구분선 -->
             <div class="d-flex justify-content-center mb-3">
@@ -33,7 +32,7 @@
             <table class="table text-center mt-1 info-table">
                 <tbody>
                 <tr>
-                    <th style="width: 150px;">아이디</th>
+                    <th>아이디</th>
                     <td th:text="${user.loginId}"></td>
                 </tr>
                 <tr>
@@ -68,7 +67,7 @@
             </table>
 
             <!-- 버튼 -->
-            <div class="d-flex justify-content-center mt-3 mb-5">
+            <div class="d-flex justify-content-center mt-5 mb-3">
                 <a href="/users/updateUserForm" class="btn btn-dark me-2" style="width: 120px;">정보 수정</a>
                 <a href="#" class="btn btn-outline-danger" style="width: 120px;"
                    onclick="event.preventDefault(); if(confirm('정말 탈퇴하시겠습니까?')) document.getElementById('deactivate-form').submit();">탈퇴하기</a>

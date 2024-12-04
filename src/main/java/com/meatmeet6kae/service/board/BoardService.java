@@ -25,10 +25,10 @@ public class BoardService {
     private static final Logger logger = LoggerFactory.getLogger(BoardService.class);
 
     private final BoardRepository boardRepository;
-    private final CommentRepository commentRepository;
-    public BoardService(BoardRepository boardRepository, CommentRepository commentRepository) {
+    private final CommentRepository commnetRepository;
+    public BoardService(BoardRepository boardRepository, CommentRepository commnetRepository) {
         this.boardRepository = boardRepository;
-        this.commentRepository = commentRepository;
+        this.commnetRepository = commnetRepository;
     }
 
     // 특정 카테고리의 게시글을 내림차순으로 조회
@@ -139,8 +139,7 @@ public class BoardService {
                 boardDto.setNickname((String) row[5]);
                 boardDto.setCreateDate(((Timestamp) row[6]).toLocalDateTime());
 
-                // 댓글 수를 추가
-                int commentCount = commentRepository.countByBoardBoardNo(boardDto.getBoardNo());
+                int commentCount = commnetRepository.countByBoardBoardNo(boardDto.getBoardNo());
                 boardDto.setCommentCount(commentCount);
 
                 boards.add(boardDto);

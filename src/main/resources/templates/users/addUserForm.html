@@ -73,8 +73,8 @@
 
             <div class="mb-3">
                 <div class="input-group">
-                <input type="text" id="addr_postcode" name="postcode" class="form-control" readonly placeholder="우편번호">
-                <input type="button" class="btn btn-outline-dark" onclick="daumPostcode()" value="우편번호 찾기">
+                    <input type="text" id="addr_postcode" name="postcode" class="form-control" readonly placeholder="우편번호">
+                    <input type="button" class="btn btn-outline-dark" onclick="daumPostcode()" value="주소 찾기">
                 </div>
             </div>
 
@@ -422,5 +422,7 @@
 </script>
 <!-- 회원 가입에 필요한 자바스크립트 함수 종료 -->
 
+<!-- 푸터 -->
+<div th:replace="~{common/footer :: footer}"></div>
 </body>
 </html>

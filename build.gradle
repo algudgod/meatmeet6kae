@@ -28,6 +28,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-mail' //이메일 전송
 	implementation 'org.springframework.boot:spring-boot-starter-validation' //유효성 검증
 	implementation 'org.springframework.boot:spring-boot-starter-security' // Spring Security
+	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE' // AWS S3 관련 설정 및 파일 업로드 서비스
+
 }
 
 tasks.named('test') {

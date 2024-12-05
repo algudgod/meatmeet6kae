@@ -27,6 +27,7 @@ public class S3RestController {
 
             // 업로드된 파일 URL 목록 반환 (JSON 형식)
             return ResponseEntity.ok(fileUrls);
+
         } catch (IOException e) {
             // 업로드 실패 시 500 Internal Server Error 반환
             e.printStackTrace();

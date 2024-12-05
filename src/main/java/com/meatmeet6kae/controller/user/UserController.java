@@ -132,7 +132,7 @@ public class UserController {
     }
 
     // 로그인 폼을 보여주는 메서드
-    @GetMapping("/login")
+    @GetMapping("/loginForm")
     public String showLoginForm() {
         return "users/login";  // templates/users/login.html 파일을 반환
     }

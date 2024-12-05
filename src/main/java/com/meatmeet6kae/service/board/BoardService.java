@@ -3,14 +3,19 @@ package com.meatmeet6kae.service.board;
 import com.meatmeet6kae.common.enums.BoardCategory;
 import com.meatmeet6kae.dto.board.BoardDto;
 import com.meatmeet6kae.entity.board.Board;
+import com.meatmeet6kae.entity.imageFile.ImageFile;
 import com.meatmeet6kae.entity.user.User;
 import com.meatmeet6kae.repository.board.BoardRepository;
 import com.meatmeet6kae.repository.comment.CommentRepository;
+import com.meatmeet6kae.repository.imageFile.ImageFileRepository;
+import com.meatmeet6kae.service.s3.S3Service;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -26,9 +31,14 @@ public class BoardService {
 
     private final BoardRepository boardRepository;
     private final CommentRepository commnetRepository;
-    public BoardService(BoardRepository boardRepository, CommentRepository commnetRepository) {
+    private final ImageFileRepository imageFileRepository;
+    private final S3Service s3Service;
+
+    public BoardService(BoardRepository boardRepository, CommentRepository commnetRepository, ImageFileRepository imageFileRepository, S3Service s3Service)  {
         this.boardRepository = boardRepository;
         this.commnetRepository = commnetRepository;
+        this.imageFileRepository = imageFileRepository;
+        this.s3Service = s3Service;
     }
 
     // 특정 카테고리의 게시글을 내림차순으로 조회
@@ -37,7 +47,7 @@ public class BoardService {
     }
 
     // 게시글 생성
-    public void addBoard(BoardDto boardDto, User user){
+    public void addBoard(BoardDto boardDto, User user, List<MultipartFile> images) throws IOException {
 
         Board board = new Board();
         board.setTitle(boardDto.getTitle());
@@ -45,6 +55,24 @@ public class BoardService {
         board.setBoardCategory(boardDto.getBoardCategory());
         board.setUser(user);
         boardRepository.save(board);
+
+        // 이미지 개수 제한 검증
+        if (images != null && images.size() > 3) {
+            throw new IllegalArgumentException("이미지는 최대 3개까지만 첨부할 수 있습니다.");
+        }
+
+        // 이미지 업로드 및 URL 저장
+        if (images != null && !images.isEmpty()) {
+            List<String> imageUrls = s3Service.uploadFiles(images); // S3에 업로드
+            for (String imageUrl : imageUrls) {
+                // ImageFile 엔티티 생성 및 저장
+                ImageFile imageFile = new ImageFile();
+                imageFile.setBoard(board); // 게시글과 연결
+                imageFile.setImageUrl(imageUrl); // S3 URL 설정
+                imageFileRepository.save(imageFile); // 데이터베이스에 저장
+            }
+        }
+
     }
 
     // 게시글의 존재 여부 검증한 후, 조회

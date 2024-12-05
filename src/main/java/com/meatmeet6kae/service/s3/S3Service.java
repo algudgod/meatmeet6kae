@@ -10,14 +10,17 @@ import java.util.List;
 
 @Service
 public class S3Service {
+
     private final AmazonS3 amazonS3; // S3 클라이언트 객체
     @Value("${cloud.aws.s3.bucket-name}") // application.properties에서 S3 버킷 이름가져오기
     private String bucket;
     public S3Service(AmazonS3 amazonS3) {
         this.amazonS3 = amazonS3;
     }
+
     public List<String> uploadFiles(List<MultipartFile> files) throws IOException {
         List<String> fileUrls = new ArrayList<>(); // 업로드된 파일들의 URL을 저장할 리스트
+
         // 파일 목록을 순회하며 각 파일을 처리
         for (MultipartFile file : files) {
             // S3에 저장할 고유 파일 이름 생성 (현재 시간 + 원래 파일 이름)

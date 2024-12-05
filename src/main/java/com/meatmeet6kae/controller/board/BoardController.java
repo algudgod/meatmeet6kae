@@ -14,7 +14,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @Controller
@@ -27,6 +29,21 @@ public class BoardController {
 
     public BoardController(BoardService boardService) {
         this.boardService = boardService;
+    }
+
+    @GetMapping("")
+    public String getBoardList(@RequestParam("boardCategory")String boardCategory, HttpSession session, Model model){
+
+        User user = (User)session.getAttribute("user");
+        model.addAttribute("user", user);
+
+        logger.debug("boardCategory: {}", boardCategory);
+        model.addAttribute("boardCategory", boardCategory);
+
+        List<Board> boards = boardService.getBoardsByCategory(boardCategory);
+        model.addAttribute("boards", boards);
+
+        return "navigation/boardList";
     }
 
     // 게시판 글쓰기 form을 보여주는 메서드
@@ -49,23 +66,8 @@ public class BoardController {
         return "boards/addBoardForm";
     }
 
-    @GetMapping("")
-    public String getBoardList(@RequestParam("boardCategory")String boardCategory, HttpSession session, Model model){
-
-        User user = (User)session.getAttribute("user");
-        model.addAttribute("user", user);
-
-        logger.debug("boardCategory: {}", boardCategory);
-        model.addAttribute("boardCategory", boardCategory);
-
-        List<Board> boards = boardService.getBoardsByCategory(boardCategory);
-        model.addAttribute("boards", boards);
-
-        return "navigation/boardList";
-    }
-
     @PostMapping("addBoard")
-    public String addBoard(@Valid BoardDto boardDto, BindingResult result, HttpSession session, Model model) {
+    public String addBoard(@Valid BoardDto boardDto, @RequestParam(value = "images", required = false)  List<MultipartFile> images, BindingResult result, HttpSession session, Model model) {
 
         // 1. 세션에서 로그인 된 사용자의 정보를 가져옴
         User user = (User) session.getAttribute("user");
@@ -77,7 +79,7 @@ public class BoardController {
         if (result.hasErrors()) {
             logger.debug("result error: {}", result.getAllErrors());
             model.addAttribute("boardCategorys", boardService.getAllBoardCategorys());
-            model.addAttribute("user",user);
+            model.addAttribute("user", user);
             model.addAttribute("error", "입력한 정보에 오류가 있습니다.");
             return "boards/addBoardForm";
         }
@@ -87,11 +89,30 @@ public class BoardController {
             boardDto.setBoardCategory("FREE");
         }
 
-        // 4. Service 레이어를 통해 게시글 저장
-        boardService.addBoard(boardDto, user);
+        // 이미지 개수 제한 검증
+        if (images != null && images.size() > 3) {
+            model.addAttribute("error", "이미지는 최대 3개까지만 첨부할 수 있습니다.");
+            return "boards/addBoardForm";
+        }
+
+        try {
+            // 4. Service 레이어를 통해 게시글 저장
+            boardService.addBoard(boardDto, user, images);
+        } catch (IOException e) {
+            // 이미지 업로드 실패 예외 처리
+            logger.error("이미지 업로드 중 오류 발생: {}", e.getMessage());
+            model.addAttribute("error", "이미지 업로드 중 오류가 발생했습니다.");
+            return "boards/addBoardForm";
+        } catch (Exception e) {
+            // 기타 예외 처리
+            logger.error("게시글 작성 중 알 수 없는 오류 발생: {}", e.getMessage());
+            model.addAttribute("error", "게시글 작성 중 오류가 발생했습니다.");
+            return "boards/addBoardForm";
+        }
 
         // 5. 게시글 등록 후 해당 카테고리로 리다이렉트
         return "redirect:/boardList?boardCategory=" + boardDto.getBoardCategory();
+
     }
 
     //게시글 상세 조회

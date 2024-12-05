@@ -4,8 +4,10 @@ import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class BoardDto {
 
@@ -27,6 +29,19 @@ public class BoardDto {
     private int categoryBoardNo; // 카테고리별 게시글 번호
 
     private int viewCount;
+
+    private List<MultipartFile> images; // 이미지 필드 추가
+
+
+
+
+    public List<MultipartFile> getImages() {
+        return images;
+    }
+
+    public void setImages(List<MultipartFile> images) {
+        this.images = images;
+    }
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime createDate;
